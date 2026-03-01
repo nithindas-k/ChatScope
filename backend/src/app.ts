@@ -1,4 +1,5 @@
 
+import { Request, Response } from "express";
 import express from "express";
 import cors from "cors";
 import { ROUTES } from "./constants/routes";
@@ -12,7 +13,7 @@ app.use(cors({ origin: "*", methods: ["GET", "POST", "DELETE"] }));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-app.get(ROUTES.HEALTH, (_req, res) => {
+app.get(ROUTES.HEALTH, (_req: Request, res: Response) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
