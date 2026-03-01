@@ -7,7 +7,7 @@ import { useChatStore, type ChatMessage } from "../stores/chatStore";
 import axiosInstance from "../config/axiosService";
 import { API_ROUTES } from "../constants/apiRoutes";
 import { motion, AnimatePresence } from "framer-motion";
-import { Navigate } from "react-router-dom";
+import NoDataView from "../components/ui/NoDataView";
 
 // Standard WA dark theme setup
 const C = {
@@ -38,7 +38,7 @@ export default function ChatPage() {
     // Removed as per user request
 
     if (!sessionId) {
-        return <Navigate to="/" replace />;
+        return <NoDataView />;
     }
 
     const triggerAsk = async (question: string) => {

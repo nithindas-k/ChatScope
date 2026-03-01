@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -40,91 +41,127 @@ function NavItem({
 }) {
     const { pathname } = useLocation();
     const active = pathname === to;
+    const { sessionId } = useChatStore();
+    const [showModal, setShowModal] = useState(false);
+
+    const requiresData = to !== "/" && to !== "/terms" && to !== "/privacy";
+
+    const handleClick = (e: React.MouseEvent) => {
+        if (requiresData && !sessionId) {
+            e.preventDefault();
+            setShowModal(true);
+            return;
+        }
+        onClick?.();
+    };
 
     return (
-        <NavLink to={to} onClick={onClick} style={{ display: "block", textDecoration: "none" }}>
-            <div
-                style={{
-                    position: "relative",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: isCollapsed ? "center" : "flex-start",
-                    gap: isCollapsed ? 0 : 12,
-                    margin: "2px 8px",
-                    padding: isCollapsed ? "12px 0" : "10px 14px",
-                    borderRadius: 12,
-                    cursor: "pointer",
-                    backgroundColor: active ? C.greenLow : "transparent",
-                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                }}
-                onMouseEnter={e => {
-                    if (!active) (e.currentTarget as HTMLDivElement).style.backgroundColor = C.surface;
-                }}
-                onMouseLeave={e => {
-                    (e.currentTarget as HTMLDivElement).style.backgroundColor = active ? C.greenLow : "transparent";
-                }}
-                title={isCollapsed ? label : ""}
-            >
-                {/* left pill indicator */}
-                {active && (
-                    <motion.div
-                        layoutId="activePill"
-                        style={{
-                            position: "absolute",
-                            left: -8, // Aligns perfectly with the left edge of the sidebar (-8px counteracts the nav item's 8px margin)
-                            top: "50%",
-                            transform: "translateY(-50%)",
-                            width: 3,
-                            height: 24,
-                            borderRadius: "0 4px 4px 0",
-                            backgroundColor: C.green,
-                            boxShadow: `0 0 10px ${C.green} `,
-                        }}
-                    />
-                )}
-
-                {/* icon */}
-                <Icon
-                    size={20}
-                    strokeWidth={active ? 2.4 : 1.8}
-                    color={active ? C.green : C.muted}
-                    style={{ flexShrink: 0, transition: "transform 0.2s" }}
-                />
-
-                {/* label */}
-                <AnimatePresence>
-                    {!isCollapsed && (
-                        <motion.span
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
+        <>
+            <NavLink to={to} onClick={handleClick} style={{ display: "block", textDecoration: "none" }}>
+                <div
+                    style={{
+                        position: "relative",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: isCollapsed ? "center" : "flex-start",
+                        gap: isCollapsed ? 0 : 12,
+                        margin: "2px 8px",
+                        padding: isCollapsed ? "12px 0" : "10px 14px",
+                        borderRadius: 12,
+                        cursor: "pointer",
+                        backgroundColor: active ? C.greenLow : "transparent",
+                        transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                    }}
+                    onMouseEnter={e => {
+                        if (!active) (e.currentTarget as HTMLDivElement).style.backgroundColor = C.surface;
+                    }}
+                    onMouseLeave={e => {
+                        (e.currentTarget as HTMLDivElement).style.backgroundColor = active ? C.greenLow : "transparent";
+                    }}
+                    title={isCollapsed ? label : ""}
+                >
+                    {/* left pill indicator */}
+                    {active && (
+                        <motion.div
+                            layoutId="activePill"
                             style={{
-                                flex: 1,
-                                fontSize: 13.5,
-                                fontWeight: 600,
-                                letterSpacing: "0.01em",
-                                color: active ? C.text : C.muted,
-                                lineHeight: 1,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden"
-                            }}>
-                            {label}
-                        </motion.span>
+                                position: "absolute",
+                                left: -8, // Aligns perfectly with the left edge of the sidebar (-8px counteracts the nav item's 8px margin)
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                                width: 3,
+                                height: 24,
+                                borderRadius: "0 4px 4px 0",
+                                backgroundColor: C.green,
+                                boxShadow: `0 0 10px ${C.green} `,
+                            }}
+                        />
                     )}
-                </AnimatePresence>
 
-                {/* badge */}
-                {!isCollapsed && badge ? (
-                    <span style={{
-                        fontSize: 10, fontWeight: 700,
-                        backgroundColor: C.green, color: "#0b141a",
-                        borderRadius: 9999, padding: "2px 6px",
-                    }}>
-                        {badge}
-                    </span>
-                ) : null}
-            </div>
-        </NavLink>
+                    {/* icon */}
+                    <Icon
+                        size={20}
+                        strokeWidth={active ? 2.4 : 1.8}
+                        color={active ? C.green : C.muted}
+                        style={{ flexShrink: 0, transition: "transform 0.2s" }}
+                    />
+
+                    {/* label */}
+                    <AnimatePresence>
+                        {!isCollapsed && (
+                            <motion.span
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -10 }}
+                                style={{
+                                    flex: 1,
+                                    fontSize: 13.5,
+                                    fontWeight: 600,
+                                    letterSpacing: "0.01em",
+                                    color: active ? C.text : C.muted,
+                                    lineHeight: 1,
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden"
+                                }}>
+                                {label}
+                            </motion.span>
+                        )}
+                    </AnimatePresence>
+
+                    {/* badge */}
+                    {!isCollapsed && badge ? (
+                        <span style={{
+                            fontSize: 10, fontWeight: 700,
+                            backgroundColor: C.green, color: "#0b141a",
+                            borderRadius: 9999, padding: "2px 6px",
+                        }}>
+                            {badge}
+                        </span>
+                    ) : null}
+                </div>
+            </NavLink>
+
+            <Dialog open={showModal} onOpenChange={setShowModal}>
+                <DialogContent className="max-w-sm sm:max-w-md bg-[#111b21] border-[#202c33] text-[#e9edef] rounded-2xl z-[100]">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-bold">No Chat Data</DialogTitle>
+                        <DialogDescription className="text-[#8696a0] mt-2">
+                            You need to upload a WhatsApp chat file first to view the {label} section.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="mt-4">
+                        <DialogClose asChild>
+                            <Button
+                                className="bg-[#00a884] hover:bg-[#00a884]/90 text-white rounded-xl px-6 font-semibold transition-all border-none focus-visible:ring-0"
+                                onClick={() => { setShowModal(false); onClick?.(); }}
+                            >
+                                Got it
+                            </Button>
+                        </DialogClose>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </>
     );
 }
 
@@ -371,7 +408,7 @@ function Panel({ close, isCollapsed }: { close?: () => void, isCollapsed?: boole
                                     <DialogFooter className="mt-4 sm:space-x-2">
                                         <DialogClose asChild>
                                             <Button
-                                                className="bg-[#00a884] hover:bg-[#00a884]/90 text-white rounded-xl shadow-lg shadow-[#00a884]/20 px-6 font-semibold transition-all border-none focus-visible:ring-0"
+                                                className="bg-[#00a884] hover:bg-[#00a884]/90 text-white rounded-xl px-6 font-semibold transition-all border-none focus-visible:ring-0"
                                             >
                                                 Cancel
                                             </Button>
@@ -379,7 +416,7 @@ function Panel({ close, isCollapsed }: { close?: () => void, isCollapsed?: boole
                                         <DialogClose asChild>
                                             <Button
                                                 onClick={handleLogout}
-                                                className="bg-[#ef4444] hover:bg-[#ef4444]/90 text-white rounded-xl shadow-lg shadow-red-500/20 px-6 font-semibold transition-all border-none focus-visible:ring-0"
+                                                className="bg-[#ef4444] hover:bg-[#ef4444]/90 text-white rounded-xl px-6 font-semibold transition-all border-none focus-visible:ring-0"
                                             >
                                                 Clear Data
                                             </Button>
