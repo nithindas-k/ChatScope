@@ -19,6 +19,7 @@ import {
     SelectValue,
 } from "../components/ui/select";
 
+import { Skeleton } from "../components/ui/skeleton";
 import { Emoji, EmojiStyle } from "emoji-picker-react";
 
 const stagger = {
@@ -31,7 +32,7 @@ const fadeUp = {
 };
 
 export default function WordsPage() {
-    const { sessionId, wordAnalysis, setWordAnalysis, setLoading } = useChatStore();
+    const { sessionId, wordAnalysis, setWordAnalysis, isLoading, setLoading } = useChatStore();
     const [error, setError] = useState<string | null>(null);
     const [selectedParticipant, setSelectedParticipant] = useState<string>("global");
 
@@ -80,7 +81,6 @@ export default function WordsPage() {
             </div>
         );
     }
-    if (!wordAnalysis) return null;
 
     const chartConfig: ChartConfig = {
         count: {
@@ -88,6 +88,30 @@ export default function WordsPage() {
             color: "#00a884",
         },
     };
+
+    const WordSkeleton = () => (
+        <div className="space-y-4 pt-10 px-2">
+            {[...Array(10)].map((_, i) => (
+                <div key={i} className="flex items-center gap-4">
+                    <Skeleton className="h-4 w-20 rounded" />
+                    <Skeleton className="h-8 flex-1 rounded-r-lg" style={{ opacity: 1 - i * 0.1 }} />
+                </div>
+            ))}
+        </div>
+    );
+
+    const EmojiSkeleton = () => (
+        <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 gap-3">
+            {[...Array(8)].map((_, i) => (
+                <div key={i} className="flex flex-col items-center justify-center p-6 rounded-2xl border border-white/5 bg-white/[0.02]">
+                    <Skeleton className="w-12 h-12 rounded-full mb-3" />
+                    <Skeleton className="h-4 w-12 rounded" />
+                </div>
+            ))}
+        </div>
+    );
+
+    if (!wordAnalysis && !isLoading) return null;
 
     return (
         <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-8 pb-12">
@@ -119,10 +143,13 @@ export default function WordsPage() {
                         <div className="flex items-center gap-2">
                             <span className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest whitespace-nowrap">Avg Len:</span>
                             <span className="font-black text-sm tabular-nums text-primary/90">
-                                {selectedParticipant === "global"
-                                    ? Math.round(wordAnalysis.avgMessageLength)
-                                    : Math.round(wordAnalysis.perSenderAvgLength[selectedParticipant] || 0)
-                                }
+                                {isLoading ? (
+                                    <Skeleton className="h-4 w-6 inline-block align-middle" />
+                                ) : (
+                                    selectedParticipant === "global"
+                                        ? Math.round(wordAnalysis?.avgMessageLength || 0)
+                                        : Math.round(wordAnalysis?.perSenderAvgLength[selectedParticipant] || 0)
+                                )}
                             </span>
                         </div>
                     </div>
@@ -152,40 +179,44 @@ export default function WordsPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="pt-4 sm:pt-8 px-2 sm:px-6">
-                            <ChartContainer config={chartConfig} className="h-[400px] sm:h-[480px] w-full">
-                                <BarChart
-                                    data={activeWords}
-                                    layout="vertical"
-                                    margin={{ left: -20, right: 10, top: 0, bottom: 0 }}
-                                >
-                                    <XAxis type="number" hide />
-                                    <YAxis
-                                        dataKey="word"
-                                        type="category"
-                                        tickLine={false}
-                                        axisLine={false}
-                                        stroke="#8696a0"
-                                        fontSize={10}
-                                        width={85}
-                                        className="capitalize font-bold tabular-nums"
-                                    />
-                                    <ChartTooltip content={<ChartTooltipContent hideIndicator />} />
-                                    <Bar
-                                        dataKey="count"
-                                        radius={[0, 6, 6, 0]}
-                                        barSize={28}
+                            {isLoading ? (
+                                <WordSkeleton />
+                            ) : (
+                                <ChartContainer config={chartConfig} className="h-[400px] sm:h-[480px] w-full">
+                                    <BarChart
+                                        data={activeWords}
+                                        layout="vertical"
+                                        margin={{ left: -20, right: 10, top: 0, bottom: 0 }}
                                     >
-                                        {activeWords.map((_, index: number) => (
-                                            <Cell
-                                                key={`cell-${index}`}
-                                                fill="var(--color-count)"
-                                                fillOpacity={index < 3 ? 1 : 0.4 + (1 - index / 15) * 0.4}
-                                                className="transition-all duration-500"
-                                            />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ChartContainer>
+                                        <XAxis type="number" hide />
+                                        <YAxis
+                                            dataKey="word"
+                                            type="category"
+                                            tickLine={false}
+                                            axisLine={false}
+                                            stroke="#8696a0"
+                                            fontSize={10}
+                                            width={85}
+                                            className="capitalize font-bold tabular-nums"
+                                        />
+                                        <ChartTooltip content={<ChartTooltipContent hideIndicator />} />
+                                        <Bar
+                                            dataKey="count"
+                                            radius={[0, 6, 6, 0]}
+                                            barSize={28}
+                                        >
+                                            {activeWords.map((_, index: number) => (
+                                                <Cell
+                                                    key={`cell-${index}`}
+                                                    fill="var(--color-count)"
+                                                    fillOpacity={index < 3 ? 1 : 0.4 + (1 - index / 15) * 0.4}
+                                                    className="transition-all duration-500"
+                                                />
+                                            ))}
+                                        </Bar>
+                                    </BarChart>
+                                </ChartContainer>
+                            )}
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -206,7 +237,9 @@ export default function WordsPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="pt-4 sm:pt-8 px-4 sm:px-6">
-                            {activeEmojis.length === 0 ? (
+                            {isLoading ? (
+                                <EmojiSkeleton />
+                            ) : activeEmojis.length === 0 ? (
                                 <div className="flex flex-col items-center gap-4 py-20 text-center">
                                     <div className="w-16 h-16 rounded-full bg-secondary/50 flex items-center justify-center">
                                         <Hash size={32} className="text-muted-foreground/20" />

@@ -7,6 +7,7 @@ import {
 import { chatApiService } from "../services/chatApi";
 import { useChatStore } from "../stores/chatStore";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Skeleton } from "../components/ui/skeleton";
 
 const stagger = {
     hidden: {},
@@ -18,7 +19,7 @@ const fadeUp = {
 };
 
 export default function InsightsPage() {
-    const { sessionId, aiSummary, setAiSummary, setLoading } = useChatStore();
+    const { sessionId, aiSummary, setAiSummary, isLoading, setLoading } = useChatStore();
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -38,6 +39,52 @@ export default function InsightsPage() {
         fetchInsights();
     }, [sessionId, aiSummary, setAiSummary, setLoading]);
 
+    const InsightsSkeleton = () => (
+        <div className="space-y-8 max-w-4xl animate-in fade-in duration-500">
+            <div className="space-y-2">
+                <Skeleton className="h-8 w-48 rounded" />
+                <Skeleton className="h-4 w-64 rounded" />
+            </div>
+
+            <Card className="p-8 h-48 bg-card/40 border-white/[0.05] rounded-3xl">
+                <div className="flex gap-4 mb-6">
+                    <Skeleton className="h-10 w-10 rounded-xl" />
+                    <Skeleton className="h-8 w-48" />
+                </div>
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-[90%] mb-2" />
+                <Skeleton className="h-4 w-[80%]" />
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[...Array(2)].map((_, i) => (
+                    <Card key={i} className="p-6 bg-card/40 border-white/[0.05] space-y-6">
+                        <Skeleton className="h-6 w-32" />
+                        <Skeleton className="h-16 w-full rounded-2xl" />
+                        <Skeleton className="h-16 w-full rounded-2xl" />
+                    </Card>
+                ))}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="p-6 bg-card/40 border-white/[0.05] space-y-4">
+                    <Skeleton className="h-6 w-40 mb-4" />
+                    {[...Array(5)].map((_, i) => (
+                        <div key={i} className="flex gap-3 items-center">
+                            <Skeleton className="h-6 w-6 rounded-full shrink-0" />
+                            <Skeleton className="h-4 w-full" />
+                        </div>
+                    ))}
+                </Card>
+                <Card className="p-6 bg-card/40 border-white/[0.05] space-y-6">
+                    <Skeleton className="h-6 w-40 mb-4" />
+                    <Skeleton className="h-24 w-full rounded-2xl" />
+                    <Skeleton className="h-24 w-full rounded-2xl" />
+                </Card>
+            </div>
+        </div>
+    );
+
     if (error) {
         return (
             <div className="flex items-center justify-center p-8 min-h-[50vh]">
@@ -45,7 +92,8 @@ export default function InsightsPage() {
             </div>
         );
     }
-    if (!aiSummary) return null;
+
+    if (isLoading || !aiSummary) return <InsightsSkeleton />;
 
     const {
         summary, mainTopics, communicationTone, relationshipStyle,

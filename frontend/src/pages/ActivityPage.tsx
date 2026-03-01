@@ -6,6 +6,7 @@ import {
 } from "recharts";
 import { Activity, Clock, PieChart as PieIcon, TrendingUp } from "lucide-react";
 import { useChatStore } from "../stores/chatStore";
+import { Skeleton } from "../components/ui/skeleton";
 import { CHART_COLORS } from "../constants/appConstants";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import {
@@ -33,8 +34,42 @@ const fadeUp = {
 };
 
 export default function ActivityPage() {
-    const { analysis } = useChatStore();
-    if (!analysis) return null;
+    const { analysis, isLoading } = useChatStore();
+
+    const ActivitySkeleton = () => (
+        <div className="space-y-8 pb-12 animate-in fade-in duration-500">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-2">
+                    <Skeleton className="h-8 w-48 rounded" />
+                    <Skeleton className="h-4 w-64 rounded" />
+                </div>
+                <Skeleton className="h-12 w-32 rounded-xl" />
+            </div>
+
+            <Card className="p-6 bg-card/40 border-white/[0.05]">
+                <Skeleton className="h-6 w-40 mb-6" />
+                <Skeleton className="h-[300px] w-full rounded-xl" />
+            </Card>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <Card className="p-6 bg-card/40 border-white/[0.05]">
+                    <Skeleton className="h-6 w-48 mb-6" />
+                    <Skeleton className="h-[250px] w-full rounded-xl" />
+                </Card>
+                <Card className="p-6 bg-card/40 border-white/[0.05]">
+                    <div className="flex justify-between items-center mb-6">
+                        <Skeleton className="h-6 w-48" />
+                        <Skeleton className="h-8 w-32 rounded-xl" />
+                    </div>
+                    <div className="flex justify-center items-center h-[250px]">
+                        <Skeleton className="h-48 w-48 rounded-full" />
+                    </div>
+                </Card>
+            </div>
+        </div>
+    );
+
+    if (isLoading || !analysis) return <ActivitySkeleton />;
 
     const { activity } = analysis;
 

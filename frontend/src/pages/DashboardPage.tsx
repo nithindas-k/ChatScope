@@ -5,6 +5,7 @@ import { chatApiService } from "../services/chatApi";
 import { useChatStore } from "../stores/chatStore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Avatar, AvatarFallback } from "../components/ui/avatar";
+import { Skeleton } from "../components/ui/skeleton";
 import { CHART_COLORS } from "../constants/appConstants";
 
 const stagger = {
@@ -17,7 +18,7 @@ const fadeUp = {
 };
 
 export default function DashboardPage() {
-    const { sessionId, analysis, setAnalysis, setLoading } = useChatStore();
+    const { sessionId, analysis, setAnalysis, isLoading, setLoading } = useChatStore();
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -47,7 +48,58 @@ export default function DashboardPage() {
         );
     }
 
-    if (!analysis) return null;
+    const DashboardSkeleton = () => (
+        <div className="flex flex-col gap-8 pb-12 animate-in fade-in duration-500">
+            <div className="flex flex-col gap-2">
+                <Skeleton className="h-10 w-48 rounded-lg" />
+                <Skeleton className="h-4 w-96 rounded-md" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                    <Card key={i} className="flex flex-col items-center justify-center p-6 bg-card/40 border-white/[0.05]">
+                        <Skeleton className="h-10 w-10 rounded-2xl mb-4" />
+                        <Skeleton className="h-3 w-20 mb-2" />
+                        <Skeleton className="h-8 w-24" />
+                    </Card>
+                ))}
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <Card className="lg:col-span-8 p-6 bg-card/40 border-white/[0.05]">
+                    <Skeleton className="h-8 w-48 mb-6" />
+                    <div className="space-y-8">
+                        {[...Array(4)].map((_, i) => (
+                            <div key={i} className="space-y-3">
+                                <div className="flex justify-between">
+                                    <div className="flex gap-4">
+                                        <Skeleton className="h-11 w-11 rounded-full" />
+                                        <div className="space-y-2">
+                                            <Skeleton className="h-4 w-32" />
+                                            <Skeleton className="h-3 w-24" />
+                                        </div>
+                                    </div>
+                                    <Skeleton className="h-8 w-12" />
+                                </div>
+                                <Skeleton className="h-2 w-full rounded-full" />
+                            </div>
+                        ))}
+                    </div>
+                </Card>
+                <Card className="lg:col-span-4 p-6 bg-card/40 border-white/[0.05]">
+                    <Skeleton className="h-12 w-12 rounded-2xl mb-6" />
+                    <Skeleton className="h-8 w-48 mb-4" />
+                    <Skeleton className="h-20 w-full rounded-2xl mb-8" />
+                    <div className="space-y-4">
+                        <Skeleton className="h-3 w-32 mb-4" />
+                        {[...Array(3)].map((_, i) => (
+                            <Skeleton key={i} className="h-12 w-full rounded-xl" />
+                        ))}
+                    </div>
+                </Card>
+            </div>
+        </div>
+    );
+
+    if (isLoading || !analysis) return <DashboardSkeleton />;
 
     const { stats } = analysis;
 
