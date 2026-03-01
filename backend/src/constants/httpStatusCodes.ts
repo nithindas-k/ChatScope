@@ -1,8 +1,3 @@
-// ============================================================
-// HTTP Status Codes - Centralized Constants
-// SOLID Principle: Single Source of Truth
-// ============================================================
-
 export const HTTP_STATUS = {
     OK: 200,
     CREATED: 201,

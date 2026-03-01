@@ -1,6 +1,4 @@
-// ============================================================
-// Custom API Error Class
-// ============================================================
+
 
 export class ApiError extends Error {
     public readonly statusCode: number;
@@ -15,9 +13,7 @@ export class ApiError extends Error {
     }
 }
 
-// ============================================================
-// Standardized API Response Builders
-// ============================================================
+
 
 export interface ApiResponse<T = unknown> {
     success: boolean;

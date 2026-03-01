@@ -1,6 +1,3 @@
-// ============================================================
-// AI Summary Service (Groq API)
-// ============================================================
 
 import Groq from "groq-sdk";
 import { ENV } from "../config/env.config";
@@ -31,7 +28,7 @@ export class AISummaryService {
     }
 
     async generateSummary(messages: IMessage[]): Promise<AISummaryResult> {
-        // Balanced sample for free tier (6k TPM) - 50 messages provide better context
+       
         const sample = messages.slice(-50);
         const chatText = sample
             .map((m) => `${m.sender}: ${m.message}`)
@@ -89,7 +86,7 @@ export class AISummaryService {
         }
     }
 
-    // Separate local sentiment scoring (for quick analysis without AI)
+   
     computeLocalSentiment(messages: IMessage[]): { positive: number; neutral: number; negative: number } {
         const positiveWords = new Set([
             "love", "great", "amazing", "awesome", "happy", "good", "nice",

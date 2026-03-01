@@ -1,6 +1,4 @@
-// ============================================================
-// Server Entry Point
-// ============================================================
+
 
 import app from "./app";
 import { connectDB } from "./config/db.config";
@@ -10,9 +8,9 @@ const startServer = async (): Promise<void> => {
     await connectDB();
 
     app.listen(ENV.PORT, () => {
-        console.log(`🚀 ChatScope API running on http://localhost:${ENV.PORT}`);
-        console.log(`📊 Environment: ${ENV.NODE_ENV}`);
-        console.log(`🔗 Health: http://localhost:${ENV.PORT}/health`);
+        console.log(` ChatScope API running on http://localhost:${ENV.PORT}`);
+        console.log(`Environment: ${ENV.NODE_ENV}`);
+        console.log(` Health: http://localhost:${ENV.PORT}/health`);
     });
 };
 

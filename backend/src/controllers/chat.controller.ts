@@ -1,7 +1,4 @@
-// ============================================================
-// Chat Controller - HTTP Layer Only
-// SOLID: Single Responsibility - no business logic here
-// ============================================================
+
 
 import { Request, Response, NextFunction } from "express";
 import { ChatParserService } from "../services/chatParser.service";
@@ -17,7 +14,7 @@ const analyzerService = new AnalyzerService();
 const aiService = new AISummaryService();
 const chatRepo = new ChatRepository();
 
-// POST /api/chat/upload
+
 export const uploadChat = async (
     req: Request,
     res: Response,
@@ -40,8 +37,7 @@ export const uploadChat = async (
             throw new ApiError(HTTP_STATUS.UNPROCESSABLE_ENTITY, MESSAGES.UPLOAD_PARSE_ERROR);
         }
 
-        // Precompute all analysis to avoid storing huge `messages` array, 
-        // which prevents MongoDB BSON 16MB document size limit issues.
+        
         const stats = analyzerService.getMessageStats(messages);
         const activity = analyzerService.getActivityData(messages);
         const responseTime = analyzerService.getResponseTimeAnalysis(messages);
@@ -73,7 +69,7 @@ export const uploadChat = async (
     }
 };
 
-// GET /api/chat/analysis/:sessionId
+
 export const getAnalysis = async (
     req: Request,
     res: Response,
@@ -102,7 +98,7 @@ export const getAnalysis = async (
     }
 };
 
-// GET /api/chat/words/:sessionId
+
 export const getWordAnalysis = async (
     req: Request,
     res: Response,
@@ -122,7 +118,7 @@ export const getWordAnalysis = async (
     }
 };
 
-// GET /api/chat/ai-summary/:sessionId
+
 export const getAiSummary = async (
     req: Request,
     res: Response,
@@ -159,7 +155,7 @@ export const getAiSummary = async (
     }
 };
 
-// GET /api/chat/response-time/:sessionId
+
 export const getResponseTime = async (
     req: Request,
     res: Response,
@@ -178,7 +174,7 @@ export const getResponseTime = async (
         next(error);
     }
 };
-// DELETE /api/chat/delete/:sessionId
+
 export const deleteChat = async (
     req: Request,
     res: Response,

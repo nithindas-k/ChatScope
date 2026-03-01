@@ -1,6 +1,3 @@
-// ============================================================
-// Global Error Handler Middleware
-// ============================================================
 
 import { Request, Response, NextFunction } from "express";
 import { ApiError, errorResponse } from "../utils/apiError";
@@ -18,7 +15,7 @@ export const errorHandler = (
         return;
     }
 
-    // Mongoose validation error
+
     if (err.name === "ValidationError") {
         res
             .status(HTTP_STATUS.UNPROCESSABLE_ENTITY)
@@ -26,7 +23,7 @@ export const errorHandler = (
         return;
     }
 
-    // Default: Unknown server error
+   
     console.error("Unhandled Error:", err);
     res
         .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)

@@ -1,7 +1,4 @@
-// ============================================================
-// Chat Parser Service
-// Single Responsibility: Parse raw WhatsApp .txt → structured messages
-// ============================================================
+
 
 import { v4 as uuidv4 } from "uuid";
 import { IMessage } from "../models/ChatAnalysis";
@@ -26,14 +23,14 @@ export class ChatParserService {
             const match = line.match(WA_MESSAGE_REGEX);
 
             if (match) {
-                // Save previous accumulated message
+                
                 if (currentMessage) {
                     messages.push(currentMessage);
                 }
 
                 const [, dateStr, timeStr, sender, messageText] = match;
 
-                // STEP 1 - CLEAN THE DATA (Removal of non-message lines)
+                
                 const isMedia =
                     messageText.includes("<Media omitted>") ||
                     messageText.includes("image omitted") ||
@@ -51,7 +48,7 @@ export class ChatParserService {
                     messageText.toLowerCase().includes("missed voice call") ||
                     messageText.toLowerCase().includes("missed video call");
 
-                // Skip cleaning items
+                
                 if (isMedia || isDeleted || isCall) {
                     continue;
                 }
@@ -69,18 +66,18 @@ export class ChatParserService {
                     sender: sender.trim(),
                     message: messageText.trim(),
                     timestamp,
-                    isMedia: false, // Per request we remove media, so any stored message is not media
+                    isMedia: false, 
                     emojis: emojiMatches,
                 };
             } else if (currentMessage && line.trim()) {
-                // Multi-line message continuation
+                
                 currentMessage.message += "\n" + line;
                 const moreEmojis = line.match(EMOJI_REGEX) ?? [];
                 currentMessage.emojis.push(...moreEmojis);
             }
         }
 
-        // Push the last message
+        
         if (currentMessage) {
             messages.push(currentMessage);
         }

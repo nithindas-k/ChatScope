@@ -1,6 +1,3 @@
-// ============================================================
-// Environment Config - Validated centrally at startup
-// ============================================================
 
 import dotenv from "dotenv";
 dotenv.config();

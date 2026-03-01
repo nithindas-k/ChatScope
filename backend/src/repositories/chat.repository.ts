@@ -1,7 +1,4 @@
-// ============================================================
-// Chat Repository - Implements IChatRepository
-// Repository Pattern: All DB operations centralized here
-// ============================================================
+
 
 import { ChatAnalysis, IMessage, IChatAnalysis } from "../models/ChatAnalysis";
 import { IChatRepository } from "../interfaces/IChatRepository";
@@ -18,7 +15,7 @@ export class ChatRepository implements IChatRepository {
         sentiment: any
     ): Promise<IChatAnalysis> {
         const participants = [...new Set(messages.map((m) => m.sender))];
-        const last50Messages = messages.slice(-50); // Store sample for AI summary
+        const last50Messages = messages.slice(-50); 
 
         const doc = await ChatAnalysis.findOneAndUpdate(
             { sessionId },

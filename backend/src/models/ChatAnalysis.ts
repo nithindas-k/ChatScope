@@ -1,6 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
 
-// ----- Single Parsed Message -----
 export interface IMessage {
     date: string;
     time: string;
@@ -12,14 +11,14 @@ export interface IMessage {
     emojis: string[];
 }
 
-// ----- Full Analysis Result Stored in DB -----
+
 export interface IChatAnalysis extends Document {
     sessionId: string;
     fileName: string;
     totalMessages: number;
     participants: string[];
 
-    // Store aggregated stats instead of 100k messages to avoid BSON 16MB limit
+    
     stats: any;
     activity: any;
     responseTime: any;

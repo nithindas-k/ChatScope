@@ -1,6 +1,4 @@
-// ============================================================
-// Upload Middleware - Multer config
-// ============================================================
+
 
 import multer, { StorageEngine } from "multer";
 import { Request } from "express";

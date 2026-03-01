@@ -1,7 +1,3 @@
-// ============================================================
-// Analyzer Service
-// Computes all statistical analytics from parsed messages
-// ============================================================
 
 import { IMessage } from "../models/ChatAnalysis";
 import { STOP_WORDS, EMOJI_REGEX } from "../utils/regexHelper";
@@ -27,7 +23,7 @@ export interface WordAnalysis {
     topWords: { word: string; count: number }[];
     emojiFrequency: { emoji: string; count: number }[];
     avgMessageLength: number;
-    // Step 4 - Per Sender Analysis
+
     perSenderWords: Record<string, { word: string; count: number }[]>;
     perSenderEmojis: Record<string, { emoji: string; count: number }[]>;
     perSenderWordCount: Record<string, number>;
@@ -35,14 +31,14 @@ export interface WordAnalysis {
 }
 
 export interface ResponseTimeAnalysis {
-    avgResponseTimeByUser: Record<string, number>; // in minutes
+    avgResponseTimeByUser: Record<string, number>;
     fastestResponder: string;
     longestGapHours: number;
     longestGapBetween: { from: string; to: string };
 }
 
 export class AnalyzerService {
-    // ---- Message Statistics ----
+  
     getMessageStats(messages: IMessage[]): MessageStats {
         const messagesPerUser: Record<string, number> = {};
         const dayCount: Record<string, number> = {};
@@ -76,7 +72,7 @@ export class AnalyzerService {
         };
     }
 
-    // ---- Activity Time-Series ----
+   
     getActivityData(messages: IMessage[]): ActivityData {
         const byDay: Record<string, number> = {};
         const byHour: Record<number, number> = {};
@@ -109,7 +105,7 @@ export class AnalyzerService {
         return { messagesPerDay, messagesPerHour, messagesPerUser };
     }
 
-    // ---- Word & Emoji Frequency ----
+    
     getWordAnalysis(messages: IMessage[]): WordAnalysis {
         const wordCount: Record<string, number> = {};
         const emojiCount: Record<string, number> = {};
@@ -122,7 +118,7 @@ export class AnalyzerService {
         const perSenderTotalLen: Record<string, number> = {};
         const perSenderMsgCount: Record<string, number> = {};
 
-        // Collect cleaned participant names and emojis from names to exclude them from message analysis
+        
         const cleanedSenderNames = new Set(
             messages.map((m) =>
                 m.sender.toLowerCase()
@@ -144,7 +140,7 @@ export class AnalyzerService {
             perSenderTotalLen[sender] = (perSenderTotalLen[sender] ?? 0) + msg.message.length;
             perSenderMsgCount[sender] = (perSenderMsgCount[sender] ?? 0) + 1;
 
-            // Count emojis (Excluding emojis that are part of the sender's identifier/name)
+            
             if (!perSenderEmojiMap[sender]) perSenderEmojiMap[sender] = {};
             msg.emojis.forEach((emoji) => {
                 if (emojisInSenderNames.has(emoji)) return;
@@ -153,7 +149,7 @@ export class AnalyzerService {
                 perSenderEmojiMap[sender][emoji] = (perSenderEmojiMap[sender][emoji] ?? 0) + 1;
             });
 
-            // Count words (Excluding words that are part of the sender's identifier/name)
+            
             const words = msg.message
                 .toLowerCase()
                 .replace(/[^a-z0-9\s]/g, " ")
@@ -204,7 +200,7 @@ export class AnalyzerService {
         };
     }
 
-    // ---- Response Time Analysis ----
+   
     getResponseTimeAnalysis(messages: IMessage[]): ResponseTimeAnalysis {
         const responseTimes: Record<string, number[]> = {};
         let longestGapMs = 0;
@@ -215,7 +211,7 @@ export class AnalyzerService {
             const prev = messages[i - 1];
             const curr = messages[i];
 
-            // Skip if same sender
+            
             if (prev.sender === curr.sender) continue;
 
             const prevTime = new Date(prev.timestamp).getTime();
@@ -223,7 +219,7 @@ export class AnalyzerService {
             const diffMs = currTime - prevTime;
 
             if (diffMs > 0 && diffMs < 24 * 60 * 60 * 1000) {
-                // Only count gaps under 24h as replies
+                
                 const diffMinutes = diffMs / (1000 * 60);
                 if (!responseTimes[curr.sender]) responseTimes[curr.sender] = [];
                 responseTimes[curr.sender].push(diffMinutes);

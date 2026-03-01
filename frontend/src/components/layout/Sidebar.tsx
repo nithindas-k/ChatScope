@@ -12,9 +12,9 @@ import { API_ROUTES } from "../../constants/apiRoutes";
 
 /* ─── colours (WA dark) ──────────────────────────── */
 const C = {
-    bg: "#0f1f27",    
-    border: "#1c2f3a",     
-    surface: "#182630",      
+    bg: "#0f1f27",
+    border: "#1c2f3a",
+    surface: "#182630",
     green: "#00a884",
     greenLow: "rgba(0,168,132,0.14)",
     text: "#e9edef",
@@ -277,9 +277,28 @@ function Panel({ close }: { close?: () => void }) {
                             <p style={{ color: C.text, fontSize: 13, fontWeight: 700, lineHeight: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                 Analyst
                             </p>
-                            <p style={{ color: C.dim, fontSize: 11, lineHeight: 1, marginTop: 5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                {fileName}
-                            </p>
+                            <div style={{ overflow: "hidden", position: "relative", width: "100%", marginTop: 5 }}>
+                                <motion.div
+                                    animate={{ x: ["0%", "-50%"] }}
+                                    transition={{
+                                        repeat: Infinity,
+                                        duration: 12,
+                                        ease: "linear",
+                                    }}
+                                    style={{
+                                        display: "flex",
+                                        width: "fit-content",
+                                        gap: "20px",
+                                    }}
+                                >
+                                    <span style={{ color: C.dim, fontSize: 11, whiteSpace: "nowrap" }}>
+                                        {fileName}
+                                    </span>
+                                    <span style={{ color: C.dim, fontSize: 11, whiteSpace: "nowrap" }}>
+                                        {fileName}
+                                    </span>
+                                </motion.div>
+                            </div>
                         </div>
 
                         {/* clear data with confirmation */}

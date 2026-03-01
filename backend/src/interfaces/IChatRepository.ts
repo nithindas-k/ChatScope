@@ -1,6 +1,4 @@
-// ============================================================
-// Repository Interface
-// ============================================================
+
 
 import { IMessage, IChatAnalysis } from "../models/ChatAnalysis";
 
