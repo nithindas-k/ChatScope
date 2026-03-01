@@ -1,6 +1,3 @@
-// ============================================================
-// Zustand Store for global session state
-// ============================================================
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";

@@ -1,6 +1,4 @@
-// ============================================================
-// Chat API Service - All API calls centralized
-// ============================================================
+
 
 import axiosInstance from "../config/axiosService";
 import { API_ROUTES } from "../constants/apiRoutes";
