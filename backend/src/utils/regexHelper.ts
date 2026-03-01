@@ -1,9 +1,9 @@
 
 export const WA_MESSAGE_REGEX =
-    /^\[?(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),?\s(\d{1,2}:\d{2}(?::\d{2})?(?:\s?[ap]m)?)\]?\s(?:-\s)?([^:]+):\s(.+)$/i;
+    /^\[?(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),?\s(\d{1,2}:\d{2}(?::\d{2})?(?:\s?[ap]m)?)\s*(?:-|at night -|in the evening -|in the afternoon -|in the morning -)?\s*(.*?):\s*(.+)$/i;
 
 export const WA_SYSTEM_MESSAGE_REGEX =
-    /^\[?(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),?\s(\d{1,2}:\d{2}(?::\d{2})?(?:\s?[ap]m)?)\]?\s(?:-\s)?(?!.+:).+$/i;
+    /^\[?(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),?\s(\d{1,2}:\d{2}(?::\d{2})?(?:\s?[ap]m)?)\s*(?:-|at night -|in the evening -|in the afternoon -|in the morning -)?\s*(?!.+:).+$/i;
 
 
 export const STOP_WORDS = new Set([
@@ -22,20 +22,22 @@ export const EMOJI_REGEX =
     /(\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu;
 
 export const parseTime12to24 = (timeStr: string): number => {
-  
     const lower = timeStr.trim().toLowerCase();
-    const isPM = lower.includes("pm");
-    const isAM = lower.includes("am");
-    const cleaned = lower.replace(/[ap]m/i, "").trim();
-    const [hourStr, minuteStr] = cleaned.split(":");
-    let hour = parseInt(hourStr, 10);
+    const isPM = lower.includes("pm") || lower.includes("night") || lower.includes("evening") || lower.includes("afternoon");
+    const isAM = lower.includes("am") || lower.includes("morning");
+
+    // Extract just the hour number
+    const match = lower.match(/^(\d{1,2}):/);
+    if (!match) return 0;
+
+    let hour = parseInt(match[1], 10);
     if (isPM && hour !== 12) hour += 12;
     if (isAM && hour === 12) hour = 0;
     return hour;
 };
 
 export const parseDateStr = (dateStr: string): Date => {
- 
+
     const parts = dateStr.split(/[\/\.-]/);
     const day = parseInt(parts[0], 10);
     const month = parseInt(parts[1], 10) - 1;

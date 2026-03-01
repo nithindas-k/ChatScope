@@ -9,6 +9,7 @@ const DashboardPage = React.lazy(() => import("./pages/DashboardPage"));
 const ActivityPage = React.lazy(() => import("./pages/ActivityPage"));
 const WordsPage = React.lazy(() => import("./pages/WordsPage"));
 const InsightsPage = React.lazy(() => import("./pages/InsightsPage"));
+const ChatPage = React.lazy(() => import("./pages/ChatPage"));
 const TermsPage = React.lazy(() => import("./pages/TermsPage"));
 const PrivacyPage = React.lazy(() => import("./pages/PrivacyPage"));
 
@@ -18,7 +19,7 @@ const Loader = () => (
   </div>
 );
 
-/* Inner pages get padded container; upload fills full area */
+
 const Padded = ({ children }: { children: React.ReactNode }) => (
   <div className="content-container">{children}</div>
 );
@@ -59,6 +60,12 @@ function App() {
                     path="/insights"
                     element={
                       <Padded><InsightsPage /></Padded>
+                    }
+                  />
+                  <Route
+                    path="/chat"
+                    element={
+                      <Padded><ChatPage /></Padded>
                     }
                   />
                   <Route path="/terms" element={<Padded><TermsPage /></Padded>} />

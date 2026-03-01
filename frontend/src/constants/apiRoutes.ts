@@ -10,5 +10,6 @@ export const API_ROUTES = {
         AI_SUMMARY: (sessionId: string) => `${BASE}/chat/ai-summary/${sessionId}`,
         RESPONSE_TIME: (sessionId: string) => `${BASE}/chat/response-time/${sessionId}`,
         DELETE: (sessionId: string) => `${BASE}/chat/delete/${sessionId}`,
+        ASK: `${BASE}/chat/ask`,
     },
 } as const;

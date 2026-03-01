@@ -3,6 +3,14 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { FullAnalysis, AISummaryResult, WordAnalysis } from "../types";
 
+export interface ChatMessage {
+    id: string;
+    role: "user" | "ai";
+    content: string;
+    timestamp: string;
+    isError?: boolean;
+}
+
 interface ChatStore {
     sessionId: string | null;
     fileName: string | null;
@@ -13,6 +21,7 @@ interface ChatStore {
     aiSummary: AISummaryResult | null;
     isLoading: boolean;
     error: string | null;
+    chatMessages: ChatMessage[];
 
     setSession: (sessionId: string, fileName: string, total: number, participants: string[]) => void;
     setAnalysis: (data: FullAnalysis) => void;
@@ -20,6 +29,7 @@ interface ChatStore {
     setAiSummary: (data: AISummaryResult) => void;
     setLoading: (v: boolean) => void;
     setError: (msg: string | null) => void;
+    setChatMessages: (messages: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => void;
     reset: () => void;
 }
 
@@ -33,6 +43,7 @@ const initialState = {
     aiSummary: null,
     isLoading: false,
     error: null,
+    chatMessages: [],
 };
 
 export const useChatStore = create<ChatStore>()(
@@ -46,6 +57,10 @@ export const useChatStore = create<ChatStore>()(
             setAiSummary: (data) => set({ aiSummary: data }),
             setLoading: (v) => set({ isLoading: v }),
             setError: (msg) => set({ error: msg }),
+            setChatMessages: (messagesAction) =>
+                set((state) => ({
+                    chatMessages: typeof messagesAction === 'function' ? messagesAction(state.chatMessages) : messagesAction
+                })),
             reset: () => set(initialState),
         }),
         {
@@ -55,6 +70,7 @@ export const useChatStore = create<ChatStore>()(
                 fileName: state.fileName,
                 totalMessages: state.totalMessages,
                 participants: state.participants,
+                chatMessages: state.chatMessages,
             }),
         }
     )

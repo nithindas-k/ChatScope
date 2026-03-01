@@ -7,6 +7,7 @@ import {
     getAiSummary,
     getResponseTime,
     deleteChat,
+    askQuestion,
 } from "../controllers/chat.controller";
 import { uploadMiddleware } from "../middlewares/uploadMiddleware";
 import { ROUTES } from "../constants/routes";
@@ -30,5 +31,8 @@ router.get(ROUTES.CHAT.RESPONSE_TIME, getResponseTime);
 
 
 router.delete(ROUTES.CHAT.DELETE, deleteChat);
+
+
+router.post("/ask", askQuestion);
 
 export default router;

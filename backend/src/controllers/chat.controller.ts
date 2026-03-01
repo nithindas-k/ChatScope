@@ -37,7 +37,7 @@ export const uploadChat = async (
             throw new ApiError(HTTP_STATUS.UNPROCESSABLE_ENTITY, MESSAGES.UPLOAD_PARSE_ERROR);
         }
 
-        
+
         const stats = analyzerService.getMessageStats(messages);
         const activity = analyzerService.getActivityData(messages);
         const responseTime = analyzerService.getResponseTimeAnalysis(messages);
@@ -184,6 +184,43 @@ export const deleteChat = async (
         const sessionId = req.params["sessionId"] as string;
         await chatRepo.deleteBySessionId(sessionId);
         res.status(HTTP_STATUS.OK).json(successResponse("Chat data cleared successfully from database", null));
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+export const askQuestion = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const sessionId = req.body.sessionId as string;
+        const question = req.body.question as string;
+
+        if (!sessionId || !question) {
+            throw new ApiError(HTTP_STATUS.BAD_REQUEST, "sessionId and question are required");
+        }
+
+        const chatDoc = await chatRepo.findBySessionId(sessionId);
+
+        if (!chatDoc) {
+            throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.ANALYSIS_NOT_FOUND);
+        }
+
+        if (!process.env.GROQ_API_KEY || process.env.GROQ_API_KEY === "your_groq_api_key_here") {
+            res.status(HTTP_STATUS.OK).json(
+                successResponse("AI features mock active", {
+                    answer: "I couldn't generate an answer due to missing Groq API Key."
+                })
+            );
+            return;
+        }
+
+        const result = await aiService.askQuestion(chatDoc, question);
+
+        res.status(HTTP_STATUS.OK).json(successResponse("Successfully generated answer", result));
     } catch (error) {
         next(error);
     }

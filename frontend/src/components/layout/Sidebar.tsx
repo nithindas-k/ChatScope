@@ -2,7 +2,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     UploadCloud, LayoutDashboard, Activity,
-    Type, Sparkles, X, Trash2, ShieldCheck, FileText, Lock
+    Type, Sparkles, X, Trash2, ShieldCheck, FileText, Lock, MessageSquare
 } from "lucide-react";
 import { useChatStore } from "../../stores/chatStore";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
@@ -28,6 +28,7 @@ const navItems = [
     { label: "Activity", icon: Activity, path: "/activity" },
     { label: "Word Analysis", icon: Type, path: "/words" },
     { label: "Insights", icon: Sparkles, path: "/insights" },
+    { label: "AI Chat", icon: MessageSquare, path: "/chat" },
 ];
 
 /* ─────────────────────────────────────────── NavItem */
@@ -70,7 +71,7 @@ function NavItem({
                         layoutId="activePill"
                         style={{
                             position: "absolute",
-                            left: 0,
+                            left: -8, // Aligns perfectly with the left edge of the sidebar (-8px counteracts the nav item's 8px margin)
                             top: "50%",
                             transform: "translateY(-50%)",
                             width: 3,
