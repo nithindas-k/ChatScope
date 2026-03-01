@@ -100,6 +100,8 @@ export default function WordsPage() {
         </div>
     );
 
+    if (!wordAnalysis && !isLoading) return null;
+
     const EmojiSkeleton = () => (
         <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 gap-3">
             {[...Array(8)].map((_, i) => (
@@ -111,7 +113,12 @@ export default function WordsPage() {
         </div>
     );
 
-    if (!wordAnalysis && !isLoading) return null;
+    const getEmojiUnified = (emojiStr: string) => {
+        return Array.from(emojiStr)
+            .map(c => c.codePointAt(0)!.toString(16))
+            .filter(hex => hex !== "fe0f") // Some emojis use FE0F which can break library matching
+            .join("-");
+    };
 
     return (
         <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-8 pb-12">
@@ -258,29 +265,47 @@ export default function WordsPage() {
                                                 : "bg-[#1c1c21]/50 border-white/5 hover:border-primary/20 hover:bg-primary/5"
                                                 }`}
                                         >
-                                            <div className="relative z-10 flex flex-col items-center gap-3">
-                                                <div className="filter drop-shadow-lg transform transition-transform group-hover/emoji:scale-110 duration-300">
-                                                    <Emoji
-                                                        unified={Array.from(emojiObj.emoji).map((c: any) => c.codePointAt(0).toString(16)).join("-")}
-                                                        emojiStyle={EmojiStyle.APPLE}
-                                                        size={42}
-                                                    />
+                                            <div className="relative z-10 flex flex-col items-center gap-3 w-full">
+                                                <div className="relative flex items-center justify-center">
+                                                    {/* Robust Native Fallback: Always present but hidden behind the high-quality emoji */}
+                                                    <span className="absolute inset-0 flex items-center justify-center text-3xl opacity-20 blur-[2px] select-none pointer-events-none">
+                                                        {emojiObj.emoji}
+                                                    </span>
+
+                                                    <div className="relative z-10 filter drop-shadow-lg transform transition-transform group-hover/emoji:scale-110 duration-500">
+                                                        <Emoji
+                                                            unified={getEmojiUnified(emojiObj.emoji)}
+                                                            emojiStyle={EmojiStyle.APPLE}
+                                                            size={48}
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <div className="flex flex-col items-center">
-                                                    <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest mb-0.5">Count</span>
-                                                    <span className="text-lg font-black tracking-tight tabular-nums text-white/90">{emojiObj.count}</span>
+
+                                                <div className="flex flex-col items-center w-full px-2">
+                                                    <div className="w-full h-[1px] bg-white/5 mb-2 hidden group-hover/emoji:block" />
+                                                    <div className="flex flex-col items-center">
+                                                        <span className="text-[9px] font-black text-muted-foreground/30 uppercase tracking-[0.2em] leading-none mb-1">Occurrences</span>
+                                                        <span className="text-xl font-black tracking-tight tabular-nums text-white/90 drop-shadow-sm">{emojiObj.count}</span>
+                                                    </div>
                                                 </div>
                                             </div>
 
                                             {idx === 0 && (
-                                                <div className="absolute top-3 right-3">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                                                <div className="absolute top-4 right-4">
+                                                    <div className="relative">
+                                                        <div className="absolute inset-0 bg-primary blur-md opacity-40 animate-pulse" />
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-primary relative z-10" />
+                                                    </div>
                                                 </div>
                                             )}
 
-                                            {/* Rank badge */}
-                                            <div className="absolute top-3 left-3 bg-white/5 w-6 h-6 rounded-lg flex items-center justify-center border border-white/5">
-                                                <span className="text-[10px] font-black text-muted-foreground/60">#{idx + 1}</span>
+                                            {/* Rank badge - more professional styling */}
+                                            <div className="absolute top-4 left-4">
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className={`text-[10px] font-black italic tracking-tighter ${idx < 3 ? 'text-primary' : 'text-muted-foreground/40'}`}>
+                                                        #{idx + 1}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </motion.div>
                                     ))}
