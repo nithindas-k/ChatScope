@@ -49,10 +49,10 @@ export default function TermsPage() {
                 <section className="space-y-3">
                     <div className="flex items-center gap-3">
                         <FileText size={20} className="text-[#00a884]" />
-                        <h2 className="text-xl font-bold">2. Service Modifications</h2>
+                        <h2 className="text-xl font-bold">2. Service Modifications & Features</h2>
                     </div>
                     <p className="text-[#8696a0] leading-relaxed">
-                        ChatScope is provided primarily as an analytics and visualization utility. We reserve the right to adjust computational limits, file size restrictions, or feature availability to ensure platform stability and prevent abuse.
+                        ChatScope provides analytics, visualizations, and an interactive AI Chat feature. We reserve the right to adjust computational limits, file size restrictions, API usage, or feature availability to ensure platform stability and prevent abuse.
                     </p>
                 </section>
 
@@ -69,10 +69,10 @@ export default function TermsPage() {
                 <section className="space-y-3">
                     <div className="flex items-center gap-3">
                         <FileText size={20} className="text-[#00a884]" />
-                        <h2 className="text-xl font-bold">4. User Uploaded Content</h2>
+                        <h2 className="text-xl font-bold">4. User Uploaded Content & Data Flow</h2>
                     </div>
                     <p className="text-[#8696a0] leading-relaxed">
-                        You retain full ownership and intellectual property rights to any export files you provide. ChatScope claims no rights to your chat history, but requires the license to temporarily parse it in memory to deliver the requested analytics. Once your session clears, the transaction concludes entirely.
+                        You retain full ownership of your chat export files. ChatScope reads your uploaded `.txt` file directly from temporary memory without ever saving it to a hard drive or permanent storage. We compute the statistics, create a temporary database session, and immediately discard the file. Once your session ends or you click "Clear Data", the temporary database session is permanently destroyed.
                     </p>
                 </section>
             </div>

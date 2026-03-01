@@ -47,16 +47,16 @@ export default function PrivacyPage() {
                 </section>
 
                 <section className="space-y-3">
-                    <h2 className="text-xl font-bold text-[#00a884]">2. Data Retention</h2>
+                    <h2 className="text-xl font-bold text-[#00a884]">2. Data Retention & Wiping</h2>
                     <p className="text-[#8696a0] leading-relaxed">
-                        We practice a strict zero-retention policy for chat contents. Uploaded files are kept temporarily in memory or secure temporary storage strictly for the duration of processing, and are permanently wiped immediately after your session ends or you clear your data.
+                        We practice a strict zero-retention policy. Your original `.txt` file is read from temporary RAM and is never written to a disk. The parsed statistics and the last 50 messages are held in a temporary database session. When you click **"Clear Data"** or your session expires, a deletion command is immediately fired permanently erasing the session from our database and wiping your local browser memory.
                     </p>
                 </section>
 
                 <section className="space-y-3">
-                    <h2 className="text-xl font-bold text-[#00a884]">3. AI Analysis</h2>
+                    <h2 className="text-xl font-bold text-[#00a884]">3. AI Chat & Provider Analysis</h2>
                     <p className="text-[#8696a0] leading-relaxed">
-                        If you utilize the AI Insights features, aggregate, anonymized snippets of metadata might be sent to our AI providers (like Groq) to generate summaries. However, none of this data is retained by us or used by our partners to train their language models.
+                        For the AI Chat Analyst and Insights features, we do not upload your full chat history to our AI providers. We compute all mathematical analytics locally on the backend. When you request AI analysis, we only send aggregate statistics (e.g. top words) and strictly the **last 50 messages** to our integrated provider (Groq). Groq's official API policies prohibit them from training models on this data or storing it.
                     </p>
                 </section>
 
