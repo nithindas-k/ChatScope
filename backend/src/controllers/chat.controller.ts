@@ -178,3 +178,17 @@ export const getResponseTime = async (
         next(error);
     }
 };
+// DELETE /api/chat/delete/:sessionId
+export const deleteChat = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const sessionId = req.params["sessionId"] as string;
+        await chatRepo.deleteBySessionId(sessionId);
+        res.status(HTTP_STATUS.OK).json(successResponse("Chat data cleared successfully from database", null));
+    } catch (error) {
+        next(error);
+    }
+};

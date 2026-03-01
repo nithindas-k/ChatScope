@@ -3,19 +3,17 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Sidebar } from "./components/layout/Sidebar";
 import { Navbar } from "./components/layout/Navbar";
 import { AnimatePresence } from "framer-motion";
-import { useChatStore } from "./stores/chatStore";
+
 
 const UploadPage = React.lazy(() => import("./pages/UploadPage"));
 const DashboardPage = React.lazy(() => import("./pages/DashboardPage"));
 const ActivityPage = React.lazy(() => import("./pages/ActivityPage"));
 const WordsPage = React.lazy(() => import("./pages/WordsPage"));
 const InsightsPage = React.lazy(() => import("./pages/InsightsPage"));
+const TermsPage = React.lazy(() => import("./pages/TermsPage"));
+const PrivacyPage = React.lazy(() => import("./pages/PrivacyPage"));
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { sessionId } = useChatStore();
-  if (!sessionId) return <Navigate to="/" replace />;
-  return <>{children}</>;
-};
+
 
 const Loader = () => (
   <div className="flex flex-1 items-center justify-center min-h-[40vh]">
@@ -74,6 +72,8 @@ function App() {
 
                     }
                   />
+                  <Route path="/terms" element={<Padded><TermsPage /></Padded>} />
+                  <Route path="/privacy" element={<Padded><PrivacyPage /></Padded>} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </AnimatePresence>

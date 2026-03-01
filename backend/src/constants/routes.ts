@@ -12,6 +12,7 @@ export const ROUTES = {
         WORD_ANALYSIS: "/words/:sessionId",
         RESPONSE_TIME: "/response-time/:sessionId",
         SENTIMENT: "/sentiment/:sessionId",
+        DELETE: "/delete/:sessionId",
     },
     HEALTH: "/health",
 } as const;

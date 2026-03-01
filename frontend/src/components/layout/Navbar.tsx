@@ -1,7 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useChatStore } from "../../stores/chatStore";
-import { Bell, Settings, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 
 const pageMeta: Record<string, { title: string; sub: string }> = {
     "/": { title: "Upload Chat", sub: "Import a WhatsApp export to begin" },
@@ -9,6 +9,8 @@ const pageMeta: Record<string, { title: string; sub: string }> = {
     "/activity": { title: "Activity", sub: "Timeline & hourly patterns" },
     "/words": { title: "Word Analysis", sub: "Most used words & emojis" },
     "/insights": { title: "AI Insights", sub: "Deep-learning analysis" },
+    "/terms": { title: "Terms of Service", sub: "Legal agreements and rules" },
+    "/privacy": { title: "Privacy Policy", sub: "How we protect your data" },
 };
 
 export function Navbar({ onOpenMobileMenu }: { onOpenMobileMenu: () => void }) {
@@ -111,44 +113,22 @@ export function Navbar({ onOpenMobileMenu }: { onOpenMobileMenu: () => void }) {
                         )}
                     </div>
 
-                    {/* Icons */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        <button style={{
-                            width: 38, height: 38, borderRadius: 10,
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            color: "#8696a0", backgroundColor: "transparent", border: "none", cursor: "pointer",
-                            transition: "background 0.2s"
-                        }} className="hover:bg-[#182229]">
-                            <Bell size={18} />
-                        </button>
 
-                        <div className="sidebar-desktop">
-                            <button style={{
-                                width: 38, height: 38, borderRadius: 10,
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                color: "#8696a0", backgroundColor: "transparent", border: "none", cursor: "pointer",
-                                transition: "background 0.2s"
-                            }} className="hover:bg-[#182229]">
-                                <Settings size={18} />
-                            </button>
-                        </div>
-                    </div>
 
-                    {/* Vertical Divider */}
-                    <div className="hidden md:block" style={{ width: 1, height: 20, backgroundColor: "#1e2d35", margin: "0 4px" }} />
-
-                    {/* Avatar */}
+                    {/* Avatar / Logo */}
                     <div
                         style={{
-                            width: 38, height: 38, borderRadius: "50%",
-                            background: "linear-gradient(135deg, #00a884 0%, #25d366 100%)",
+                            width: 38, height: 38, borderRadius: 10,
                             display: "flex", alignItems: "center", justifyContent: "center",
-                            color: "#fff", fontSize: 13, fontWeight: 800,
-                            boxShadow: "0 0 12px rgba(0,168,132,0.3)",
-                            cursor: "pointer", flexShrink: 0
+                            cursor: "pointer", flexShrink: 0, overflow: "hidden"
                         }}
                     >
-                        {fileName ? fileName.charAt(0).toUpperCase() : "U"}
+                        <img
+                            src="/ChatScope.png"
+                            alt="ChatScope App Logo"
+                            style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                            className="drop-shadow-lg"
+                        />
                     </div>
                 </div>
             </div>
