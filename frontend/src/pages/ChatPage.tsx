@@ -95,12 +95,14 @@ export default function ChatPage() {
             {/* Header */}
             <header className="px-4 md:px-6 py-3 md:py-4 flex items-center justify-between shrink-0 shadow-sm relative z-10 bg-black/20 border-b border-white/5">
                 <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-8 h-8 rounded shrink-0 overflow-hidden bg-white shadow-sm">
-                        <img src="/ChatScope.png" alt="ChatScope Logo" className="w-full h-full object-contain" />
+                    <div className="flex items-center justify-center w-10 h-10 rounded-xl shrink-0 overflow-hidden">
+                        <img src="/ChatScope.png" alt="ChatScope Logo" className="w-full h-full object-contain drop-shadow-lg" />
                     </div>
                     <div>
                         <h1 className="text-base font-bold tracking-tight" style={{ color: C.text }}>AI Chat Analyst</h1>
-                        <p className="text-[11px] font-medium" style={{ color: C.muted }}>Session: {fileName}</p>
+                        <p className="text-[11px] font-medium" style={{ color: C.muted }}>
+                            Session: {fileName ? fileName.replace(/[^\x20-\x7E]/g, '').replace(/\.txt$/i, '') : ''}
+                        </p>
                     </div>
                 </div>
             </header>
