@@ -19,7 +19,7 @@ export interface AISummaryResult {
         neutral: number;
         negative: number;
     };
-    personalityProfiles: Record<string, string>;
+    personalityProfiles: Record<string, { archetype: string; coreTrait: string }>;
     keyInsights: string[];
 }
 
@@ -31,67 +31,59 @@ export class AISummaryService {
     }
 
     async generateSummary(messages: IMessage[]): Promise<AISummaryResult> {
-        // Even more conservative for free tier (6k TPM)
-        const sample = messages.slice(-70);
+        // Balanced sample for free tier (6k TPM) - 50 messages provide better context
+        const sample = messages.slice(-50);
         const chatText = sample
             .map((m) => `${m.sender}: ${m.message}`)
             .join("\n");
 
-        const prompt = `You are a world-class behavioral psychologist and linguistic forensic expert. Analyze this WhatsApp conversation and provide a deep psychological profile and analytical breakdown. 
-        IMPORTANT: Respond ONLY with a valid JSON object. Do not include any character outside the JSON.
-
-        Deep Analysis Requirements:
-        1. "summary": A sophisticated 2-3 sentence overview of the relationship dynamic and context.
-        2. "mainTopics": The core themes discussed, focusing on underlying subtext.
-        3. "communicationTone": Describe the technical and emotional tone (e.g. "Passive-aggressive with occasional warmth").
-        4. "relationshipStyle": Categorize the power dynamic and attachment style visible in the chat.
-        5. "sentimentBreakdown": Percentage breakdown of emotional charge (Positive/Neutral/Negative).
-        6. "personalityProfiles": For each participant, provide a 1-sentence behavioral archetype.
-        7. "keyInsights": 3-5 high-level observations about the hidden patterns.
-
-        Chat Data:
-        ${chatText}
-
-        Expected Output Structure:
+        const prompt = `Perform a sophisticated behavioral psychology analysis of the following chat.
+        Provide deep insights into the participants' psyche and relationship dynamics.
+        
+        Return ONLY a JSON object with this exact structure:
         {
-          "summary": "...",
-          "mainTopics": [],
-          "communicationTone": "...",
-          "relationshipStyle": "...",
-          "sentimentBreakdown": { "positive": X, "neutral": Y, "negative": Z },
-          "personalityProfiles": { "SenderName": "...", "SenderName": "..." },
-          "keyInsights": []
-        }`;
+          "summary": "A detailed 3-4 sentence paragraph summarizing the overall narrative and psychological context of the interaction.",
+          "mainTopics": ["Context-specific topic 1", "Context-specific topic 2", "Context-specific topic 3"],
+          "communicationTone": "An elegant, specific description of the conversational vibe (e.g., 'Analytically detached with bursts of emotional urgency')",
+          "relationshipStyle": "A precise characterization of the bond (e.g., 'Interdependent and intellectually synchronized')",
+          "sentimentBreakdown": { "positive": number, "neutral": number, "negative": number },
+          "personalityProfiles": { 
+            "ParticipantName": {
+               "archetype": "A detailed 1-2 sentence behavioral archetype describing their role and psychology in the chat",
+               "coreTrait": "A concise, uppercase label for their persona (e.g., 'THE PERSUADER')"
+            }
+          },
+          "keyInsights": [
+             "Deep observation about their interactive pattern",
+             "Insight into underlying motivations or hidden subtext",
+             "Observation about the specific linguistic choices made",
+             "Synthesis of their long-term dynamic based on this snapshot"
+          ]
+        }
+
+        Chat Log:
+        ${chatText}`;
 
         try {
-            console.log(`[AI SERVICE] Generating summary for ${sample.length} messages...`);
             const completion = await this.groq.chat.completions.create({
                 model: "llama-3.1-8b-instant",
-                messages: [{ role: "user", content: prompt }],
-                temperature: 0.1,
-                max_tokens: 1024,
+                messages: [
+                    {
+                        role: "system",
+                        content: "You are an expert behavioral psychologist and linguistic analyst."
+                    },
+                    { role: "user", content: prompt }
+                ],
+                temperature: 0.3,
+                max_tokens: 800,
                 response_format: { type: "json_object" }
             });
 
             const content = completion.choices[0]?.message?.content ?? "{}";
-
-
-            const jsonMatch = content.match(/\{[\s\S]*\}/);
-            if (!jsonMatch) {
-                throw new ApiError(HTTP_STATUS.INTERNAL_SERVER_ERROR, MESSAGES.AI_SUMMARY_ERROR);
-            }
-
-            const result = JSON.parse(jsonMatch[0]) as AISummaryResult;
+            const result = JSON.parse(content) as AISummaryResult;
             return result;
         } catch (error: any) {
             if (error instanceof ApiError) throw error;
-            try {
-                require('fs').writeFileSync('c:\\Users\\nithi\\OneDrive\\Documents\\Brototype\\ChatScope\\backend\\groq_final_debug.log', JSON.stringify({
-                    msg: error.message,
-                    st: error.status,
-                    dt: error.response?.data
-                }, null, 2));
-            } catch (loggingError) { }
             console.error("Groq API Error:", error.message);
             throw new ApiError(HTTP_STATUS.SERVICE_UNAVAILABLE, MESSAGES.AI_SUMMARY_ERROR);
         }

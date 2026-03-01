@@ -2,12 +2,16 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
     Sparkles, Brain, Heart, HeartCrack,
-    Minus, MessageCircle, Palette
+    Minus, User,
+    Zap, Quote, Eye
 } from "lucide-react";
 import { chatApiService } from "../services/chatApi";
 import { useChatStore } from "../stores/chatStore";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Skeleton } from "../components/ui/skeleton";
+import { Separator } from "../components/ui/separator";
+import { Avatar, AvatarFallback } from "../components/ui/avatar";
+import { Progress } from "../components/ui/progress";
 
 const stagger = {
     hidden: {},
@@ -40,46 +44,48 @@ export default function InsightsPage() {
     }, [sessionId, aiSummary, setAiSummary, setLoading]);
 
     const InsightsSkeleton = () => (
-        <div className="space-y-8 max-w-4xl animate-in fade-in duration-500">
-            <div className="space-y-2">
-                <Skeleton className="h-8 w-48 rounded" />
-                <Skeleton className="h-4 w-64 rounded" />
-            </div>
-
-            <Card className="p-8 h-48 bg-card/40 border-white/[0.05] rounded-3xl">
-                <div className="flex gap-4 mb-6">
-                    <Skeleton className="h-10 w-10 rounded-xl" />
-                    <Skeleton className="h-8 w-48" />
+        <div className="space-y-6 container mx-auto py-6 animate-in fade-in duration-500 max-w-6xl px-4">
+            <div className="flex justify-between items-end border-b border-white/5 pb-4">
+                <div className="space-y-2">
+                    <Skeleton className="h-8 w-48 rounded" />
+                    <Skeleton className="h-4 w-64 rounded" />
                 </div>
-                <Skeleton className="h-4 w-full mb-2" />
-                <Skeleton className="h-4 w-[90%] mb-2" />
-                <Skeleton className="h-4 w-[80%]" />
-            </Card>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[...Array(2)].map((_, i) => (
-                    <Card key={i} className="p-6 bg-card/40 border-white/[0.05] space-y-6">
-                        <Skeleton className="h-6 w-32" />
-                        <Skeleton className="h-16 w-full rounded-2xl" />
-                        <Skeleton className="h-16 w-full rounded-2xl" />
-                    </Card>
-                ))}
+                <Skeleton className="h-6 w-24 rounded-full" />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="p-6 bg-card/40 border-white/[0.05] space-y-4">
-                    <Skeleton className="h-6 w-40 mb-4" />
-                    {[...Array(5)].map((_, i) => (
-                        <div key={i} className="flex gap-3 items-center">
-                            <Skeleton className="h-6 w-6 rounded-full shrink-0" />
-                            <Skeleton className="h-4 w-full" />
-                        </div>
-                    ))}
-                </Card>
-                <Card className="p-6 bg-card/40 border-white/[0.05] space-y-6">
-                    <Skeleton className="h-6 w-40 mb-4" />
-                    <Skeleton className="h-24 w-full rounded-2xl" />
-                    <Skeleton className="h-24 w-full rounded-2xl" />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-6">
+                    <Card className="bg-card/40 border-white/5">
+                        <CardHeader><Skeleton className="h-6 w-32" /></CardHeader>
+                        <CardContent><Skeleton className="h-20 w-full" /></CardContent>
+                    </Card>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Card className="bg-card/40 border-white/5 h-48">
+                            <CardHeader><Skeleton className="h-4 w-24" /></CardHeader>
+                            <CardContent className="space-y-4 pt-4">
+                                {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-2 w-full" />)}
+                            </CardContent>
+                        </Card>
+                        <Card className="bg-card/40 border-white/5 h-48">
+                            <CardHeader><Skeleton className="h-4 w-24" /></CardHeader>
+                            <CardContent className="space-y-4 pt-4">
+                                <Skeleton className="h-12 w-full" />
+                                <Skeleton className="h-12 w-full" />
+                            </CardContent>
+                        </Card>
+                    </div>
+                    <Card className="bg-card/40 border-white/5">
+                        <CardHeader><Skeleton className="h-6 w-32" /></CardHeader>
+                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {[...Array(2)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
+                        </CardContent>
+                    </Card>
+                </div>
+                <Card className="bg-card/40 border-white/5 h-[600px]">
+                    <CardHeader><Skeleton className="h-6 w-32" /></CardHeader>
+                    <CardContent className="space-y-3">
+                        {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
+                    </CardContent>
                 </Card>
             </div>
         </div>
@@ -107,164 +113,185 @@ export default function InsightsPage() {
     ];
 
     return (
-        <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-8 max-w-4xl">
-
-            {/* Page Header */}
-            <motion.div variants={fadeUp}>
-                <h2 className="text-2xl font-extrabold text-[#e9edef] tracking-tight">AI Insights</h2>
-                <p className="text-sm text-[#8696a0] mt-1">Deep learning analysis of your conversation</p>
-            </motion.div>
-
-            {/* AI Summary Banner */}
-            <motion.div variants={fadeUp}>
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#00a884]/20 via-[#111b21] to-[#202c33] border border-[#00a884]/20 p-6 md:p-8">
-                    <Sparkles className="absolute -right-4 -top-4 text-[#00a884] opacity-10" size={140} />
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2.5 rounded-xl bg-[#00a884]/15 border border-[#00a884]/20">
-                                <Brain size={20} className="text-[#00a884]" />
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-bold text-[#00a884] uppercase tracking-widest">AI Generated</p>
-                                <h3 className="text-lg font-bold text-[#e9edef]">Conversation Summary</h3>
-                            </div>
-                        </div>
-                        <p className="text-[#e9edef] text-base leading-relaxed">{summary}</p>
-                    </div>
+        <motion.div
+            variants={stagger}
+            initial="hidden"
+            animate="visible"
+            className="container mx-auto py-6 space-y-6 max-w-6xl pb-20 px-4"
+        >
+            {/* Header Section */}
+            <motion.div variants={fadeUp} className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                        <Brain className="text-primary w-6 h-6" />
+                        AI Analysis Engine
+                    </h1>
+                    <p className="text-xs text-muted-foreground font-medium">
+                        Sophisticated behavioral synthesis and linguistic patterns
+                    </p>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-bold text-primary uppercase tracking-widest">
+                    <Sparkles className="w-3 h-3" />
+                    Llama 3.1 Pro
                 </div>
             </motion.div>
 
-            {/* Tone & Style + Sentiment */}
-            <motion.div variants={stagger} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                {/* Tone & Style */}
-                <motion.div variants={fadeUp}>
-                    <Card className="bg-[#111b21] border-[#202c33] rounded-2xl h-full">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-3 text-base font-bold text-[#e9edef]">
-                                <div className="p-2 rounded-lg bg-[#AB7ACA]/10">
-                                    <Palette size={16} className="text-[#AB7ACA]" />
-                                </div>
-                                Style &amp; Tone
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-5 pt-3">
-                            <div className="p-4 bg-[#202c33] rounded-2xl border border-[#2a3942]">
-                                <p className="text-[10px] font-bold text-[#8696a0] uppercase tracking-widest mb-2">Communication Tone</p>
-                                <p className="text-2xl font-extrabold text-[#53BDEB] capitalize">{communicationTone}</p>
-                            </div>
-                            <div className="p-4 bg-[#202c33] rounded-2xl border border-[#2a3942]">
-                                <p className="text-[10px] font-bold text-[#8696a0] uppercase tracking-widest mb-2">Relationship Style</p>
-                                <p className="text-2xl font-extrabold text-[#FFB300] capitalize">{relationshipStyle}</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </motion.div>
+                {/* Left Side: Summary & Archetypes */}
+                <div className="lg:col-span-2 space-y-6">
 
-                {/* Sentiment */}
-                <motion.div variants={fadeUp}>
-                    <Card className="bg-[#111b21] border-[#202c33] rounded-2xl h-full">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-3 text-base font-bold text-[#e9edef]">
-                                <div className="p-2 rounded-lg bg-[#f15c6d]/10">
-                                    <Heart size={16} className="text-[#f15c6d]" />
+                    {/* Core Narrative */}
+                    <motion.div variants={fadeUp}>
+                        <Card className="bg-card/40 border-white/5 shadow-xl">
+                            <CardHeader className="pb-3 pt-4 px-6">
+                                <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
+                                    <Quote className="w-4 h-4 text-primary" />
+                                    Linguistic Narrative
+                                </CardTitle>
+                                <CardDescription className="text-[10px]">Relationship dynamic and context overview</CardDescription>
+                            </CardHeader>
+                            <CardContent className="px-6 pb-6">
+                                <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                                    <p className="text-sm sm:text-base text-[#e9edef] leading-relaxed italic pr-4">
+                                        "{summary}"
+                                    </p>
                                 </div>
-                                Sentiment Breakdown
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-5 pt-3">
-                            {sentiments.map((s) => (
-                                <div key={s.label}>
-                                    <div className="flex items-center justify-between mb-2">
-                                        <span className="flex items-center gap-2 text-sm font-semibold text-[#e9edef]">
-                                            <s.icon size={14} style={{ color: s.color }} />
-                                            {s.label}
-                                        </span>
-                                        <span className="text-sm font-bold" style={{ color: s.color }}>{s.value}%</span>
-                                    </div>
-                                    <div className="w-full h-2.5 bg-[#202c33] rounded-full overflow-hidden">
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            animate={{ width: `${s.value}%` }}
-                                            transition={{ duration: 1.2, ease: "easeOut" }}
-                                            className="h-full rounded-full"
-                                            style={{ backgroundColor: s.color }}
-                                        />
-                                    </div>
-                                </div>
-                            ))}
-                        </CardContent>
-                    </Card>
-                </motion.div>
-            </motion.div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
 
-            {/* Key Insights + Behavioral Flags */}
-            <motion.div variants={stagger} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Behavioral Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
 
-                {/* Key Insights */}
-                <motion.div variants={fadeUp}>
-                    <Card className="bg-[#111b21] border-[#202c33] rounded-2xl h-full">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-3 text-base font-bold text-[#e9edef]">
-                                <div className="p-2 rounded-lg bg-[#00a884]/10">
-                                    <MessageCircle size={16} className="text-[#00a884]" />
-                                </div>
-                                Intelligence Insights
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-3">
-                            <ul className="space-y-3">
-                                {keyInsights.concat(mainTopics).slice(0, 7).map((insight: string, idx: number) => (
-                                    <motion.li
-                                        key={idx}
-                                        variants={fadeUp}
-                                        className="flex items-start gap-3 p-3 rounded-xl bg-[#202c33] border border-[#2a3942] text-sm"
-                                    >
-                                        <span className="shrink-0 mt-0.5 w-5 h-5 rounded-full bg-[#00a884]/15 border border-[#00a884]/20 flex items-center justify-center text-[9px] font-bold text-[#00a884]">
-                                            {idx + 1}
-                                        </span>
-                                        <span className="text-[#e9edef] leading-relaxed">{insight}</span>
-                                    </motion.li>
-                                ))}
-                            </ul>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-
-                {/* Personality Archetypes */}
-                <motion.div variants={fadeUp}>
-                    <Card className="bg-[#111b21] border-[#202c33] rounded-2xl h-full border-t-2 border-t-[#53BDEB]">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-3 text-base font-bold text-[#e9edef]">
-                                <div className="p-2 rounded-lg bg-[#53BDEB]/10">
-                                    <Brain size={16} className="text-[#53BDEB]" />
-                                </div>
-                                Personality Archetypes
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-3 space-y-4">
-                            {personalityProfiles && Object.entries(personalityProfiles).map(([name, profile]) => (
-                                <motion.div
-                                    key={name}
-                                    variants={fadeUp}
-                                    className="p-4 rounded-2xl bg-[#202c33] border border-[#2a3942] relative overflow-hidden group"
-                                >
-                                    <div className="flex items-center gap-3 mb-2 relative z-10">
-                                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs border border-primary/20">
-                                            {name.charAt(0).toUpperCase()}
+                        {/* Sentiment Spectrum */}
+                        <motion.div variants={fadeUp} className="h-full">
+                            <Card className="h-full bg-card/40 border-white/5">
+                                <CardHeader className="pb-2 pt-4 px-6">
+                                    <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                                        <Heart className="w-3 h-3 text-rose-500" />
+                                        Sentiment Analysis
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4 pt-2 px-6 pb-6">
+                                    {sentiments.map((s) => (
+                                        <div key={s.label} className="space-y-1.5">
+                                            <div className="flex justify-between text-[10px] font-bold">
+                                                <span className="text-[#e9edef] flex items-center gap-1.5 opacity-70">
+                                                    <s.icon size={10} style={{ color: s.color }} />
+                                                    {s.label}
+                                                </span>
+                                                <span style={{ color: s.color }}>{s.value}%</span>
+                                            </div>
+                                            <Progress
+                                                value={s.value}
+                                                className="h-1.5 bg-white/5"
+                                            />
                                         </div>
-                                        <h4 className="font-bold text-[#e9edef] text-sm">{name}</h4>
+                                    ))}
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+
+                        {/* Tone & Style */}
+                        <motion.div variants={fadeUp} className="h-full">
+                            <Card className="h-full bg-card/40 border-white/5">
+                                <CardHeader className="pb-2 pt-4 px-6">
+                                    <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                                        <Zap className="w-3 h-3 text-amber-500" />
+                                        Style mechanics
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-3 pt-2 px-6 pb-6">
+                                    <div className="flex flex-col gap-1 p-3 rounded-lg bg-white/[0.02] border border-white/5">
+                                        <span className="text-[9px] font-black uppercase text-muted-foreground/40 tracking-wider">Communication Tone</span>
+                                        <span className="text-sm font-bold text-white capitalize">{communicationTone}</span>
                                     </div>
-                                    <p className="text-xs text-[#8696a0] leading-relaxed relative z-10">{profile}</p>
-                                    <div className="absolute right-[-10%] bottom-[-20%] opacity-[0.03] group-hover:opacity-10 transition-opacity">
-                                        <Brain size={80} />
+                                    <div className="flex flex-col gap-1 p-3 rounded-lg bg-white/[0.02] border border-white/5">
+                                        <span className="text-[9px] font-black uppercase text-muted-foreground/40 tracking-wider">Relational Style</span>
+                                        <span className="text-sm font-bold text-white capitalize">{relationshipStyle}</span>
                                     </div>
-                                </motion.div>
-                            ))}
-                        </CardContent>
-                    </Card>
-                </motion.div>
-            </motion.div>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    </div>
+
+                    {/* Participant Profiles */}
+                    <motion.div variants={fadeUp}>
+                        <Card className="bg-card/40 border-white/5">
+                            <CardHeader className="pt-4 px-6 pb-2">
+                                <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
+                                    <User className="w-4 h-4 text-emerald-500" />
+                                    Participant Profiles
+                                </CardTitle>
+                                <CardDescription className="text-[10px]">Deep behavioral archetypes of chatters</CardDescription>
+                            </CardHeader>
+                            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 px-6 pb-6">
+                                {personalityProfiles && Object.entries(personalityProfiles).map(([name, data]: [string, any]) => (
+                                    <div
+                                        key={name}
+                                        className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all group"
+                                    >
+                                        <Avatar className="w-8 h-8 border border-white/10 shrink-0 mt-0.5">
+                                            <AvatarFallback className="bg-primary/20 text-primary font-bold text-xs uppercase">
+                                                {name.charAt(0)}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div className="space-y-1 min-w-0 flex-1">
+                                            <div className="flex items-baseline justify-between gap-2">
+                                                <h4 className="text-xs font-bold text-white truncate">{name}</h4>
+                                                <span className="text-[7px] font-black uppercase text-primary tracking-widest px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20 shrink-0">
+                                                    {data.coreTrait}
+                                                </span>
+                                            </div>
+                                            <p className="text-[10px] text-muted-foreground leading-snug italic">
+                                                "{data.archetype}"
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                </div>
+
+                {/* Right Side: Deep Insights Feed */}
+                <div className="space-y-6">
+                    <motion.div variants={fadeUp} className="h-full">
+                        <Card className="bg-card/40 border-white/5 h-full relative overflow-hidden group">
+                            <CardHeader className="pb-3 pt-4 px-6">
+                                <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
+                                    <Sparkles className="w-4 h-4 text-amber-500" />
+                                    Synthesized Insights
+                                </CardTitle>
+                                <CardDescription className="text-[10px]">Unique behavioral observations</CardDescription>
+                            </CardHeader>
+
+                            <CardContent className="px-6 pb-6 space-y-2">
+                                {keyInsights.concat(mainTopics).slice(0, 8).map((insight, idx) => (
+                                    <div
+                                        key={idx}
+                                        className="flex gap-3 p-3 rounded-lg bg-white/[0.02] border border-white/5 hover:border-primary/20 hover:bg-white/[0.04] transition-all group/item"
+                                    >
+                                        <div className="shrink-0 flex items-center justify-center w-5 h-5 rounded-md bg-white/5 text-[8px] font-black group-hover/item:text-primary transition-colors text-muted-foreground">
+                                            {idx + 1}
+                                        </div>
+                                        <p className="text-[11px] font-medium text-[#e9edef] leading-relaxed">
+                                            {insight}
+                                        </p>
+                                    </div>
+                                ))}
+
+                                <Separator className="bg-white/5 my-4" />
+                                <div className="flex items-center gap-2 text-[9px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em] justify-center pt-2">
+                                    <Eye className="w-3 h-3" />
+                                    Analysis Complete
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                </div>
+            </div>
         </motion.div>
     );
 }
