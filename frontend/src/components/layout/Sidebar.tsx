@@ -214,7 +214,7 @@ function Panel({ close, isCollapsed }: { close?: () => void, isCollapsed?: boole
             <Label isCollapsed={isCollapsed}>Main Menu</Label>
             <nav>
                 {navItems.map(item => (
-                    <NavItem key={item.path} to={item.path} icon={item.icon} label={item.label} isCollapsed={isCollapsed} />
+                    <NavItem key={item.path} to={item.path} icon={item.icon} label={item.label} isCollapsed={isCollapsed} onClick={close} />
                 ))}
             </nav>
 
@@ -222,7 +222,7 @@ function Panel({ close, isCollapsed }: { close?: () => void, isCollapsed?: boole
             <Label isCollapsed={isCollapsed}>Services</Label>
             <nav style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <div
-                    onClick={() => { navigate("/terms"); }}
+                    onClick={() => { navigate("/terms"); close?.(); }}
                     style={{
                         display: "flex", alignItems: "center",
                         justifyContent: isCollapsed ? "center" : "flex-start",
@@ -239,7 +239,7 @@ function Panel({ close, isCollapsed }: { close?: () => void, isCollapsed?: boole
                     {!isCollapsed && <span style={{ fontSize: 13.5, fontWeight: 500, color: C.muted }}>Terms of Service</span>}
                 </div>
                 <div
-                    onClick={() => { navigate("/privacy"); }}
+                    onClick={() => { navigate("/privacy"); close?.(); }}
                     style={{
                         display: "flex", alignItems: "center",
                         justifyContent: isCollapsed ? "center" : "flex-start",
@@ -391,7 +391,7 @@ function Panel({ close, isCollapsed }: { close?: () => void, isCollapsed?: boole
                     </div>
                 ) : (
                     <div
-                        onClick={() => { navigate("/"); }}
+                        onClick={() => { navigate("/"); close?.(); }}
                         style={{
                             display: "flex", alignItems: "center",
                             justifyContent: isCollapsed ? "center" : "flex-start",
