@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Sidebar } from "./components/layout/Sidebar";
 import { Navbar } from "./components/layout/Navbar";
 import { AnimatePresence } from "framer-motion";
+import Lenis from "lenis";
+import { useEffect } from "react";
 
 
 const UploadPage = React.lazy(() => import("./pages/UploadPage"));
@@ -28,6 +30,30 @@ const Padded = ({ children }: { children: React.ReactNode }) => (
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
+
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 2,
+      infinite: false,
+    });
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
 
   return (
     <BrowserRouter>

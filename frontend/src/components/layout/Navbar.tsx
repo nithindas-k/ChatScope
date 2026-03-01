@@ -1,7 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useChatStore } from "../../stores/chatStore";
-import { Menu } from "lucide-react";
+import { PanelLeft } from "lucide-react";
 
 const pageMeta: Record<string, { title: string; sub: string }> = {
     "/": { title: "Upload Chat", sub: "Import a WhatsApp export to begin" },
@@ -52,7 +52,7 @@ export function Navbar({ onOpenMobileMenu }: { onOpenMobileMenu: () => void }) {
                             transition: "all 0.2s"
                         }}
                     >
-                        <Menu size={20} />
+                        <PanelLeft size={20} />
                     </button>
 
                     <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0 }}>
