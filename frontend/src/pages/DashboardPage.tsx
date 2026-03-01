@@ -18,25 +18,39 @@ const fadeUp = {
 };
 
 export default function DashboardPage() {
-    const { sessionId, analysis, setAnalysis, isLoading, setLoading } = useChatStore();
+    const { sessionId, analysis, setAnalysis, aiSummary, setAiSummary, isLoading, setLoading } = useChatStore();
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         async function fetchData() {
-            if (!sessionId || analysis) return;
+            if (!sessionId) return;
+
             try {
                 setLoading(true);
-                const res = await chatApiService.getAnalysis(sessionId);
-                if (res.success && res.data) setAnalysis(res.data);
-                else setError(res.message);
+
+                // Parallel fetch for analysis and AI summary
+                const [analysisRes, aiRes] = await Promise.all([
+                    !analysis ? chatApiService.getAnalysis(sessionId) : Promise.resolve(null),
+                    !aiSummary ? chatApiService.getAiSummary(sessionId).catch(() => null) : Promise.resolve(null)
+                ]);
+
+                if (analysisRes?.success && analysisRes.data) {
+                    setAnalysis(analysisRes.data);
+                } else if (!analysis && analysisRes) {
+                    setError(analysisRes.message);
+                }
+
+                if (aiRes?.success && aiRes.data) {
+                    setAiSummary(aiRes.data);
+                }
             } catch (err: any) {
-                setError(err.message || "Failed to load analysis");
+                setError(err.message || "Failed to load dashboard data");
             } finally {
                 setLoading(false);
             }
         }
         fetchData();
-    }, [sessionId, analysis, setAnalysis, setLoading]);
+    }, [sessionId, analysis, aiSummary, setAnalysis, setAiSummary, setLoading]);
 
     if (error) {
         return (
@@ -286,26 +300,39 @@ export default function DashboardPage() {
                             </CardHeader>
                             <CardContent className="space-y-8 relative">
                                 <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.05] leading-relaxed">
-                                    <p className="text-sm text-white/70">
-                                        Based on the conversation flow, we've identified a <span className="text-primary font-black">highly collaborative</span> dynamic.
-                                        Peak engagement occurs around <span className="text-white font-black">{stats.mostActiveHour}:00</span>, suggesting this as the primary coordination window.
-                                    </p>
+                                    <div className="text-sm text-white/70">
+                                        {aiSummary ? (
+                                            <>
+                                                <p className="line-clamp-4 italic text-xs leading-relaxed opacity-90 mb-3">"{aiSummary.summary}"</p>
+                                                <p className="text-[11px]">
+                                                    Peak engagement occurs around <span className="text-primary font-black">{stats.mostActiveHour}:00</span>,
+                                                    aligning with a <span className="text-white font-black lowercase">{aiSummary.communicationTone}</span> atmosphere.
+                                                </p>
+                                            </>
+                                        ) : (
+                                            <div className="space-y-3">
+                                                <Skeleton className="h-4 w-full" />
+                                                <Skeleton className="h-4 w-3/4" />
+                                                <Skeleton className="h-10 w-full" />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="space-y-5">
-                                    <h4 className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em]">Key Indicators</h4>
+                                    <h4 className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em]">Core Indicators</h4>
                                     <div className="grid gap-3">
                                         {[
-                                            { label: "Healthy Engagement", status: "Optimal" },
-                                            { label: "Consistent Activity", status: "Verified" },
-                                            { label: "Collaborative Tone", status: "Strong" }
+                                            { label: "Dominant Tone", value: aiSummary?.communicationTone || "Analyzing...", iconColor: "bg-primary" },
+                                            { label: "Relational Style", value: aiSummary?.relationshipStyle || "Synthesizing...", iconColor: "bg-amber-500" },
+                                            { label: "Peak Activity", value: `${stats.mostActiveHour}:00`, iconColor: "bg-emerald-500" }
                                         ].map(item => (
                                             <div key={item.label} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.05] transition-colors">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(0,168,132,0.5)]" />
-                                                    <span className="text-xs font-bold text-white/80">{item.label}</span>
+                                                    <div className={`w-2 h-2 rounded-full ${item.iconColor} shadow-[0_0_8px_rgba(255,255,255,0.2)]`} />
+                                                    <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider">{item.label}</span>
                                                 </div>
-                                                <span className="text-[9px] font-black text-primary uppercase tracking-widest">{item.status}</span>
+                                                <span className="text-[10px] font-black text-primary capitalize text-right max-w-[140px] truncate">{item.value}</span>
                                             </div>
                                         ))}
                                     </div>
