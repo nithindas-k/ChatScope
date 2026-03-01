@@ -3,9 +3,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Sidebar } from "./components/layout/Sidebar";
 import { Navbar } from "./components/layout/Navbar";
 import { AnimatePresence } from "framer-motion";
-import Lenis from "lenis";
-import { useEffect } from "react";
-
 
 const UploadPage = React.lazy(() => import("./pages/UploadPage"));
 const DashboardPage = React.lazy(() => import("./pages/DashboardPage"));
@@ -14,8 +11,6 @@ const WordsPage = React.lazy(() => import("./pages/WordsPage"));
 const InsightsPage = React.lazy(() => import("./pages/InsightsPage"));
 const TermsPage = React.lazy(() => import("./pages/TermsPage"));
 const PrivacyPage = React.lazy(() => import("./pages/PrivacyPage"));
-
-
 
 const Loader = () => (
   <div className="flex flex-1 items-center justify-center min-h-[40vh]">
@@ -29,38 +24,14 @@ const Padded = ({ children }: { children: React.ReactNode }) => (
 );
 
 function App() {
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
-
-  useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
-      smoothWheel: true,
-      wheelMultiplier: 1,
-      touchMultiplier: 2,
-      infinite: false,
-    });
-
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
-
-    return () => {
-      lenis.destroy();
-    };
-  }, []);
+  const [sidebarOpen, setSidebarOpen] = React.useState(window.innerWidth > 1024);
 
   return (
     <BrowserRouter>
-      <div className="flex h-screen w-screen overflow-hidden">
+      <div className="flex h-screen w-screen overflow-hidden bg-background">
         <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <Navbar onOpenMobileMenu={() => setSidebarOpen(true)} />
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+          <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
           <main className="flex-1 overflow-y-auto bg-background">
             <Suspense fallback={<Loader />}>
               <AnimatePresence mode="wait">
@@ -69,33 +40,25 @@ function App() {
                   <Route
                     path="/dashboard"
                     element={
-
                       <Padded><DashboardPage /></Padded>
-
                     }
                   />
                   <Route
                     path="/activity"
                     element={
-
                       <Padded><ActivityPage /></Padded>
-
                     }
                   />
                   <Route
                     path="/words"
                     element={
-
                       <Padded><WordsPage /></Padded>
-
                     }
                   />
                   <Route
                     path="/insights"
                     element={
-
                       <Padded><InsightsPage /></Padded>
-
                     }
                   />
                   <Route path="/terms" element={<Padded><TermsPage /></Padded>} />

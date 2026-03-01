@@ -32,10 +32,10 @@ const navItems = [
 
 /* ─────────────────────────────────────────── NavItem */
 function NavItem({
-    to, icon: Icon, label, badge, onClick,
+    to, icon: Icon, label, badge, onClick, isCollapsed
 }: {
     to: string; icon: React.ElementType; label: string;
-    badge?: number; onClick?: () => void;
+    badge?: number; onClick?: () => void; isCollapsed?: boolean;
 }) {
     const { pathname } = useLocation();
     const active = pathname === to;
@@ -47,13 +47,14 @@ function NavItem({
                     position: "relative",
                     display: "flex",
                     alignItems: "center",
-                    gap: 12,
-                    margin: "1px 10px",
-                    padding: "10px 14px",
-                    borderRadius: 10,
+                    justifyContent: isCollapsed ? "center" : "flex-start",
+                    gap: isCollapsed ? 0 : 12,
+                    margin: "2px 8px",
+                    padding: isCollapsed ? "12px 0" : "10px 14px",
+                    borderRadius: 12,
                     cursor: "pointer",
                     backgroundColor: active ? C.greenLow : "transparent",
-                    transition: "background-color 0.15s",
+                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}
                 onMouseEnter={e => {
                     if (!active) (e.currentTarget as HTMLDivElement).style.backgroundColor = C.surface;
@@ -61,6 +62,7 @@ function NavItem({
                 onMouseLeave={e => {
                     (e.currentTarget as HTMLDivElement).style.backgroundColor = active ? C.greenLow : "transparent";
                 }}
+                title={isCollapsed ? label : ""}
             >
                 {/* left pill indicator */}
                 {active && (
@@ -71,8 +73,8 @@ function NavItem({
                             left: 0,
                             top: "50%",
                             transform: "translateY(-50%)",
-                            width: 4,
-                            height: 26,
+                            width: 3,
+                            height: 24,
                             borderRadius: "0 4px 4px 0",
                             backgroundColor: C.green,
                             boxShadow: `0 0 10px ${C.green} `,
@@ -83,25 +85,35 @@ function NavItem({
                 {/* icon */}
                 <Icon
                     size={20}
-                    strokeWidth={active ? 2.5 : 1.9}
+                    strokeWidth={active ? 2.4 : 1.8}
                     color={active ? C.green : C.muted}
-                    style={{ flexShrink: 0 }}
+                    style={{ flexShrink: 0, transition: "transform 0.2s" }}
                 />
 
                 {/* label */}
-                <span style={{
-                    flex: 1,
-                    fontSize: 13.5,
-                    fontWeight: 600,
-                    letterSpacing: "0.01em",
-                    color: active ? C.text : C.muted,
-                    lineHeight: 1,
-                }}>
-                    {label}
-                </span>
+                <AnimatePresence>
+                    {!isCollapsed && (
+                        <motion.span
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            style={{
+                                flex: 1,
+                                fontSize: 13.5,
+                                fontWeight: 600,
+                                letterSpacing: "0.01em",
+                                color: active ? C.text : C.muted,
+                                lineHeight: 1,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden"
+                            }}>
+                            {label}
+                        </motion.span>
+                    )}
+                </AnimatePresence>
 
                 {/* badge */}
-                {badge ? (
+                {!isCollapsed && badge ? (
                     <span style={{
                         fontSize: 10, fontWeight: 700,
                         backgroundColor: C.green, color: "#0b141a",
@@ -116,7 +128,8 @@ function NavItem({
 }
 
 /* ─────────────────────────────────── Section label */
-function Label({ children }: { children: string }) {
+function Label({ children, isCollapsed }: { children: string, isCollapsed?: boolean }) {
+    if (isCollapsed) return <div style={{ height: 20 }} />;
     return (
         <p style={{
             fontSize: 10.5,
@@ -132,7 +145,7 @@ function Label({ children }: { children: string }) {
 }
 
 /* ─────────────────────────────────── Sidebar panel */
-function Panel({ close }: { close?: () => void }) {
+function Panel({ close, isCollapsed }: { close?: () => void, isCollapsed?: boolean }) {
     const navigate = useNavigate();
     const { fileName, reset } = useChatStore();
 
@@ -165,7 +178,13 @@ function Panel({ close }: { close?: () => void }) {
         }}>
 
             {/* ── Logo ───────────────────────────────────── */}
-            <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "24px 20px 20px" }}>
+            <div style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: isCollapsed ? "center" : "flex-start",
+                gap: 12,
+                padding: isCollapsed ? "24px 0 20px" : "24px 20px 20px"
+            }}>
                 <div style={{
                     width: 40, height: 40,
                     borderRadius: 12,
@@ -175,72 +194,84 @@ function Panel({ close }: { close?: () => void }) {
                 }}>
                     <img src="/ChatScope.png" alt="ChatScope Logo" style={{ width: "100%", height: "100%", objectFit: "contain" }} className="drop-shadow-lg" />
                 </div>
-                <div>
-                    <p style={{ color: C.text, fontWeight: 800, fontSize: 16, lineHeight: 1, letterSpacing: "-0.02em" }}>
-                        ChatScope
-                    </p>
-                    <p style={{ color: C.green, fontWeight: 700, fontSize: 9.5, letterSpacing: "0.2em", textTransform: "uppercase", marginTop: 4 }}>
-                        AI Analytics
-                    </p>
-                </div>
+                {!isCollapsed && (
+                    <div>
+                        <p style={{ color: C.text, fontWeight: 800, fontSize: 16, lineHeight: 1, letterSpacing: "-0.02em" }}>
+                            ChatScope
+                        </p>
+                        <p style={{ color: C.green, fontWeight: 700, fontSize: 9.5, letterSpacing: "0.2em", textTransform: "uppercase", marginTop: 4 }}>
+                            AI Analytics
+                        </p>
+                    </div>
+                )}
             </div>
 
             {/* ── divider ─────────────────────────────────── */}
             <div style={{ height: 1, backgroundColor: C.border, margin: "0 16px" }} />
 
             {/* ── Main Menu ───────────────────────────────── */}
-            <Label>Main Menu</Label>
+            <Label isCollapsed={isCollapsed}>Main Menu</Label>
             <nav>
                 {navItems.map(item => (
-                    <NavItem key={item.path} to={item.path} icon={item.icon} label={item.label} onClick={close} />
+                    <NavItem key={item.path} to={item.path} icon={item.icon} label={item.label} isCollapsed={isCollapsed} />
                 ))}
             </nav>
 
             {/* ── Services ─────────────────────────────────── */}
-            <Label>Services</Label>
+            <Label isCollapsed={isCollapsed}>Services</Label>
             <nav style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <div
-                    onClick={() => { navigate("/terms"); close?.(); }}
+                    onClick={() => { navigate("/terms"); }}
                     style={{
-                        display: "flex", alignItems: "center", gap: 12,
-                        margin: "0 10px", padding: "10px 14px", borderRadius: 10,
+                        display: "flex", alignItems: "center",
+                        justifyContent: isCollapsed ? "center" : "flex-start",
+                        gap: 12,
+                        margin: isCollapsed ? "2px 8px" : "0 10px",
+                        padding: isCollapsed ? "10px 14px" : "10px 14px",
+                        borderRadius: 10,
                         cursor: "pointer", transition: "background-color 0.15s",
                     }}
                     onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.backgroundColor = C.surface}
                     onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.backgroundColor = "transparent"}
                 >
                     <FileText size={18} strokeWidth={2} color={C.muted} style={{ flexShrink: 0 }} />
-                    <span style={{ fontSize: 13.5, fontWeight: 500, color: C.muted }}>Terms of Service</span>
+                    {!isCollapsed && <span style={{ fontSize: 13.5, fontWeight: 500, color: C.muted }}>Terms of Service</span>}
                 </div>
                 <div
-                    onClick={() => { navigate("/privacy"); close?.(); }}
+                    onClick={() => { navigate("/privacy"); }}
                     style={{
-                        display: "flex", alignItems: "center", gap: 12,
-                        margin: "0 10px", padding: "10px 14px", borderRadius: 10,
+                        display: "flex", alignItems: "center",
+                        justifyContent: isCollapsed ? "center" : "flex-start",
+                        gap: 12,
+                        margin: isCollapsed ? "2px 8px" : "0 10px",
+                        padding: isCollapsed ? "10px 14px" : "10px 14px",
+                        borderRadius: 10,
                         cursor: "pointer", transition: "background-color 0.15s",
                     }}
                     onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.backgroundColor = C.surface}
                     onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.backgroundColor = "transparent"}
                 >
                     <Lock size={18} strokeWidth={2} color={C.muted} style={{ flexShrink: 0 }} />
-                    <span style={{ fontSize: 13.5, fontWeight: 500, color: C.muted }}>Privacy Policy</span>
+                    {!isCollapsed && <span style={{ fontSize: 13.5, fontWeight: 500, color: C.muted }}>Privacy Policy</span>}
                 </div>
             </nav>
 
             {/* ── Privacy Info ─────────────────────────────────── */}
-            <Label>Privacy</Label>
-            <div style={{
-                margin: "0 10px", padding: "12px 14px", borderRadius: 12,
-                backgroundColor: "rgba(0,168,132,0.04)", border: "1px dashed rgba(0,168,132,0.2)"
-            }} className="cursor-default select-none group transition-all hover:bg-[rgba(0,168,132,0.08)]">
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <ShieldCheck size={20} strokeWidth={2} color={C.green} style={{ flexShrink: 0 }} className="group-hover:scale-110 transition-transform duration-300" />
-                    <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: C.green, lineHeight: 1, letterSpacing: "-0.01em" }}>100% Secure</span>
-                        <span style={{ fontSize: 11, color: C.muted, lineHeight: 1.2 }}>We do not store or save your chats.</span>
+            {!isCollapsed && <Label>Privacy</Label>}
+            {!isCollapsed && (
+                <div style={{
+                    margin: "0 10px", padding: "12px 14px", borderRadius: 12,
+                    backgroundColor: "rgba(0,168,132,0.04)", border: "1px dashed rgba(0,168,132,0.2)"
+                }} className="cursor-default select-none group transition-all hover:bg-[rgba(0,168,132,0.08)]">
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <ShieldCheck size={20} strokeWidth={2} color={C.green} style={{ flexShrink: 0 }} className="group-hover:scale-110 transition-transform duration-300" />
+                        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: C.green, lineHeight: 1, letterSpacing: "-0.01em" }}>100% Secure</span>
+                            <span style={{ fontSize: 11, color: C.muted, lineHeight: 1.2 }}>We do not store or save your chats.</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* ── Spacer ──────────────────────────────────── */}
             <div style={{ flex: 1 }} />
@@ -249,14 +280,16 @@ function Panel({ close }: { close?: () => void }) {
             <div style={{ height: 1, backgroundColor: C.border, margin: "0 16px" }} />
 
             {/* ── User card / Action Area ───────────────────────────────── */}
-            <div style={{ padding: "14px 12px 16px" }}>
+            <div style={{ padding: isCollapsed ? "14px 8px 16px" : "14px 12px 16px" }}>
                 {fileName ? (
                     <div style={{
-                        display: "flex", alignItems: "center", gap: 12,
-                        backgroundColor: C.surface,
-                        border: `1px solid ${C.border} `,
+                        display: "flex", alignItems: "center",
+                        justifyContent: isCollapsed ? "center" : "flex-start",
+                        gap: 12,
+                        backgroundColor: isCollapsed ? "transparent" : C.surface,
+                        border: isCollapsed ? "none" : `1px solid ${C.border} `,
                         borderRadius: 12,
-                        padding: "12px 12px",
+                        padding: isCollapsed ? "12px 0" : "12px 12px",
                     }}>
                         {/* avatar */}
                         <div style={{
@@ -273,93 +306,99 @@ function Panel({ close }: { close?: () => void }) {
                         </div>
 
                         {/* text */}
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ color: C.text, fontSize: 13, fontWeight: 700, lineHeight: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                Analyst
-                            </p>
-                            <div style={{ overflow: "hidden", position: "relative", width: "100%", marginTop: 5 }}>
-                                <motion.div
-                                    animate={{ x: ["0%", "-50%"] }}
-                                    transition={{
-                                        repeat: Infinity,
-                                        duration: 12,
-                                        ease: "linear",
-                                    }}
-                                    style={{
-                                        display: "flex",
-                                        width: "fit-content",
-                                        gap: "20px",
-                                    }}
-                                >
-                                    <span style={{ color: C.dim, fontSize: 11, whiteSpace: "nowrap" }}>
-                                        {fileName}
-                                    </span>
-                                    <span style={{ color: C.dim, fontSize: 11, whiteSpace: "nowrap" }}>
-                                        {fileName}
-                                    </span>
-                                </motion.div>
+                        {!isCollapsed && (
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                                <p style={{ color: C.text, fontSize: 13, fontWeight: 700, lineHeight: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                    Analyst
+                                </p>
+                                <div style={{ overflow: "hidden", position: "relative", width: "100%", marginTop: 5 }}>
+                                    <motion.div
+                                        animate={{ x: ["0%", "-50%"] }}
+                                        transition={{
+                                            repeat: Infinity,
+                                            duration: 12,
+                                            ease: "linear",
+                                        }}
+                                        style={{
+                                            display: "flex",
+                                            width: "fit-content",
+                                            gap: "20px",
+                                        }}
+                                    >
+                                        <span style={{ color: C.dim, fontSize: 11, whiteSpace: "nowrap" }}>
+                                            {fileName}
+                                        </span>
+                                        <span style={{ color: C.dim, fontSize: 11, whiteSpace: "nowrap" }}>
+                                            {fileName}
+                                        </span>
+                                    </motion.div>
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* clear data with confirmation */}
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <button
-                                    title="Clear chat data"
-                                    style={{
-                                        padding: 6, borderRadius: 8, border: "none",
-                                        backgroundColor: "transparent", cursor: "pointer",
-                                        color: C.dim, display: "flex", alignItems: "center", justifyContent: "center",
-                                        flexShrink: 0, transition: "all 0.15s",
-                                    }}
-                                    onMouseEnter={e => {
-                                        (e.currentTarget as HTMLButtonElement).style.color = "#ef4444";
-                                        (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(239, 68, 68, 0.1)";
-                                    }}
-                                    onMouseLeave={e => {
-                                        (e.currentTarget as HTMLButtonElement).style.color = C.dim;
-                                        (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent";
-                                    }}
-                                >
-                                    <Trash2 size={16} strokeWidth={2} />
-                                </button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-sm sm:max-w-md bg-[#111b21] border-[#202c33] text-[#e9edef] rounded-2xl">
-                                <DialogHeader>
-                                    <DialogTitle className="text-xl font-bold">Clear Chat Data?</DialogTitle>
-                                    <DialogDescription className="text-[#8696a0] mt-2">
-                                        This will immediately remove your uploaded chat data from the current session. You will need to re-upload a WhatsApp file to view analytics again.
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <DialogFooter className="mt-4 sm:space-x-2">
-                                    <DialogClose asChild>
-                                        <Button
-                                            className="bg-[#00a884] hover:bg-[#00a884]/90 text-white rounded-xl shadow-lg shadow-[#00a884]/20 px-6 font-semibold transition-all border-none focus-visible:ring-0"
-                                        >
-                                            Cancel
-                                        </Button>
-                                    </DialogClose>
-                                    <DialogClose asChild>
-                                        <Button
-                                            onClick={handleLogout}
-                                            className="bg-[#ef4444] hover:bg-[#ef4444]/90 text-white rounded-xl shadow-lg shadow-red-500/20 px-6 font-semibold transition-all border-none focus-visible:ring-0"
-                                        >
-                                            Clear Data
-                                        </Button>
-                                    </DialogClose>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
+                        {!isCollapsed && (
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <button
+                                        title="Clear chat data"
+                                        style={{
+                                            padding: 6, borderRadius: 8, border: "none",
+                                            backgroundColor: "transparent", cursor: "pointer",
+                                            color: C.dim, display: "flex", alignItems: "center", justifyContent: "center",
+                                            flexShrink: 0, transition: "all 0.15s",
+                                        }}
+                                        onMouseEnter={e => {
+                                            (e.currentTarget as HTMLButtonElement).style.color = "#ef4444";
+                                            (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(239, 68, 68, 0.1)";
+                                        }}
+                                        onMouseLeave={e => {
+                                            (e.currentTarget as HTMLButtonElement).style.color = C.dim;
+                                            (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent";
+                                        }}
+                                    >
+                                        <Trash2 size={16} strokeWidth={2} />
+                                    </button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-sm sm:max-w-md bg-[#111b21] border-[#202c33] text-[#e9edef] rounded-2xl">
+                                    <DialogHeader>
+                                        <DialogTitle className="text-xl font-bold">Clear Chat Data?</DialogTitle>
+                                        <DialogDescription className="text-[#8696a0] mt-2">
+                                            This will immediately remove your uploaded chat data from the current session. You will need to re-upload a WhatsApp file to view analytics again.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <DialogFooter className="mt-4 sm:space-x-2">
+                                        <DialogClose asChild>
+                                            <Button
+                                                className="bg-[#00a884] hover:bg-[#00a884]/90 text-white rounded-xl shadow-lg shadow-[#00a884]/20 px-6 font-semibold transition-all border-none focus-visible:ring-0"
+                                            >
+                                                Cancel
+                                            </Button>
+                                        </DialogClose>
+                                        <DialogClose asChild>
+                                            <Button
+                                                onClick={handleLogout}
+                                                className="bg-[#ef4444] hover:bg-[#ef4444]/90 text-white rounded-xl shadow-lg shadow-red-500/20 px-6 font-semibold transition-all border-none focus-visible:ring-0"
+                                            >
+                                                Clear Data
+                                            </Button>
+                                        </DialogClose>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+                        )}
                     </div>
                 ) : (
                     <div
-                        onClick={() => { navigate("/"); close?.(); }}
+                        onClick={() => { navigate("/"); }}
                         style={{
-                            display: "flex", alignItems: "center", gap: 12,
+                            display: "flex", alignItems: "center",
+                            justifyContent: isCollapsed ? "center" : "flex-start",
+                            gap: 12,
                             backgroundColor: "transparent",
-                            border: `1px dashed ${C.dim}40`,
+                            border: isCollapsed ? "none" : `1px dashed ${C.dim}40`,
                             borderRadius: 12,
-                            padding: "12px",
+                            padding: isCollapsed ? "8px 0" : "12px",
                             cursor: "pointer",
                             transition: "all 0.2s"
                         }}
@@ -381,14 +420,16 @@ function Panel({ close }: { close?: () => void }) {
                         }}>
                             <UploadCloud size={16} strokeWidth={2.5} />
                         </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ color: C.text, fontSize: 13, fontWeight: 700, lineHeight: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                No Chat Uploaded
-                            </p>
-                            <p style={{ color: C.dim, fontSize: 11, lineHeight: 1, marginTop: 5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                Provide Chat to Analyze
-                            </p>
-                        </div>
+                        {!isCollapsed && (
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                                <p style={{ color: C.text, fontSize: 13, fontWeight: 700, lineHeight: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                    No Chat Uploaded
+                                </p>
+                                <p style={{ color: C.dim, fontSize: 11, lineHeight: 1, marginTop: 5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                    Provide Chat to Analyze
+                                </p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
@@ -401,13 +442,28 @@ function Panel({ close }: { close?: () => void }) {
 export function Sidebar({ open, setOpen }: { open: boolean, setOpen: (v: boolean) => void }) {
     return (
         <>
-            {/* Desktop sidebar - always visible on large screens */}
-            <aside
-                className="hidden md:flex flex-col"
-                style={{ width: 248, height: "100vh", position: "sticky", top: 0, flexShrink: 0, zIndex: 40 }}
+            {/* Desktop sidebar - toggleable with animation */}
+            <motion.aside
+                initial={false}
+                animate={{
+                    width: open ? 248 : 78,
+                    // Remove x translation to keep it visible
+                }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                className="hidden md:flex flex-col overflow-hidden"
+                style={{
+                    height: "100vh",
+                    position: "sticky",
+                    top: 0,
+                    flexShrink: 0,
+                    zIndex: 40,
+                    borderRight: `1px solid ${C.border}`
+                }}
             >
-                <Panel />
-            </aside>
+                <div style={{ width: "100%", height: "100%" }}>
+                    <Panel isCollapsed={!open} />
+                </div>
+            </motion.aside>
 
             {/* Mobile drawer */}
             <AnimatePresence>
@@ -415,14 +471,15 @@ export function Sidebar({ open, setOpen }: { open: boolean, setOpen: (v: boolean
                     <>
                         <motion.div
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            style={{ position: "fixed", inset: 0, zIndex: 40, backgroundColor: "rgba(0,0,0,0.65)", backdropFilter: "blur(4px)" }}
+                            className="md:hidden"
+                            style={{ position: "fixed", inset: 0, zIndex: 40, backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)" }}
                             onClick={() => setOpen(false)}
                         />
                         <motion.aside
                             initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }}
                             transition={{ type: "spring", damping: 30, stiffness: 260 }}
-                            className="show-mobile"
-                            style={{ position: "fixed", left: 0, top: 0, height: "100%", width: 248, zIndex: 50, display: "flex", flexDirection: "column" }}
+                            className="md:hidden flex flex-col"
+                            style={{ position: "fixed", left: 0, top: 0, height: "100%", width: 248, zIndex: 50 }}
                         >
                             <button
                                 onClick={() => setOpen(false)}
