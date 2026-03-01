@@ -11,7 +11,6 @@ const axiosInstance: AxiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
-        // Attach auth token if it exists in future
         const token = localStorage.getItem("auth_token");
         if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`;
@@ -21,7 +20,7 @@ axiosInstance.interceptors.request.use(
     (error: AxiosError) => Promise.reject(error)
 );
 
-// ---- Response Interceptor ----
+
 axiosInstance.interceptors.response.use(
     (response: AxiosResponse) => response,
     (error: AxiosError) => {

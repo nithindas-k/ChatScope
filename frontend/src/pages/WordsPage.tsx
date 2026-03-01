@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { MessageCircle, Smile, Type, Hash, Users } from "lucide-react";
+import { MessageCircle, Smile, Type, Hash, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Cell } from "recharts";
 import { chatApiService } from "../services/chatApi";
 import { useChatStore } from "../stores/chatStore";
@@ -21,6 +21,7 @@ import {
 
 import { Skeleton } from "../components/ui/skeleton";
 import { Emoji, EmojiStyle } from "emoji-picker-react";
+import NoDataView from "../components/ui/NoDataView";
 
 const stagger = {
     hidden: {},
@@ -35,6 +36,11 @@ export default function WordsPage() {
     const { sessionId, wordAnalysis, setWordAnalysis, isLoading, setLoading } = useChatStore();
     const [error, setError] = useState<string | null>(null);
     const [selectedParticipant, setSelectedParticipant] = useState<string>("global");
+    const [wordPage, setWordPage] = useState<number>(0);
+    const wordsPerPage = 15;
+
+    const [emojiPage, setEmojiPage] = useState<number>(0);
+    const emojisPerPage = 16;
 
     useEffect(() => {
         async function fetchWords() {
@@ -53,21 +59,37 @@ export default function WordsPage() {
         fetchWords();
     }, [sessionId, wordAnalysis, setWordAnalysis, setLoading]);
 
-    const activeWords = useMemo(() => {
+    // Reset pagination when participant changes
+    useEffect(() => {
+        setWordPage(0);
+        setEmojiPage(0);
+    }, [selectedParticipant]);
+
+    const allActiveWordsUnpaginated = useMemo(() => {
         if (!wordAnalysis) return [];
         if (selectedParticipant === "global") {
-            return wordAnalysis.topWords.slice(0, 15);
+            return wordAnalysis.topWords;
         }
-        return (wordAnalysis.perSenderWords[selectedParticipant] || []).slice(0, 15);
+        return wordAnalysis.perSenderWords[selectedParticipant] || [];
+    }, [wordAnalysis, selectedParticipant]);
+
+    const activeWords = useMemo(() => {
+        const start = wordPage * wordsPerPage;
+        return allActiveWordsUnpaginated.slice(start, start + wordsPerPage);
+    }, [allActiveWordsUnpaginated, wordPage]);
+
+    const allActiveEmojisUnpaginated = useMemo(() => {
+        if (!wordAnalysis) return [];
+        if (selectedParticipant === "global") {
+            return wordAnalysis.emojiFrequency;
+        }
+        return wordAnalysis.perSenderEmojis[selectedParticipant] || [];
     }, [wordAnalysis, selectedParticipant]);
 
     const activeEmojis = useMemo(() => {
-        if (!wordAnalysis) return [];
-        if (selectedParticipant === "global") {
-            return wordAnalysis.emojiFrequency.slice(0, 16);
-        }
-        return (wordAnalysis.perSenderEmojis[selectedParticipant] || []).slice(0, 16);
-    }, [wordAnalysis, selectedParticipant]);
+        const start = emojiPage * emojisPerPage;
+        return allActiveEmojisUnpaginated.slice(start, start + emojisPerPage);
+    }, [allActiveEmojisUnpaginated, emojiPage]);
 
     const participants = useMemo(() => {
         if (!wordAnalysis) return [];
@@ -100,6 +122,7 @@ export default function WordsPage() {
         </div>
     );
 
+    if (!sessionId) return <NoDataView />;
     if (!wordAnalysis && !isLoading) return null;
 
     const EmojiSkeleton = () => (
@@ -170,16 +193,36 @@ export default function WordsPage() {
                     <Card className="bg-card/40 border-white/5 backdrop-blur-xl rounded-2xl h-full shadow-2xl overflow-hidden relative group">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 opacity-0 group-hover:opacity-100 transition-opacity" />
                         <CardHeader className="pb-2 p-4 sm:p-6">
-                            <div className="flex items-center justify-between gap-3">
-                                <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg font-black tracking-tight">
-                                    <div className="p-2 sm:p-2.5 rounded-xl bg-primary/10 shadow-inner shrink-0">
+                            <div className="flex items-center justify-between gap-2 sm:gap-3">
+                                <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg font-black tracking-tight min-w-0">
+                                    <div className="p-2 sm:p-2.5 rounded-xl bg-primary/10 shadow-inner shrink-0 hidden xs:flex">
                                         <MessageCircle size={16} className="text-primary" />
                                     </div>
                                     <span className="truncate">Top Used Words</span>
                                 </CardTitle>
-                                <span className="text-[9px] sm:text-[10px] font-black text-primary/60 bg-primary/10 px-2 sm:px-3 py-1 rounded-lg uppercase tracking-widest shrink-0">
-                                    Top 15
-                                </span>
+                                <div className="flex items-center gap-1 sm:gap-2 shrink-0 bg-[#1c1c21]/80 backdrop-blur-sm p-1 rounded-xl border border-white/5">
+                                    <button
+                                        onClick={() => setWordPage(p => Math.max(0, p - 1))}
+                                        disabled={wordPage === 0}
+                                        className="p-1 sm:p-1.5 rounded-lg hover:bg-primary/20 hover:text-primary transition-all disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-current cursor-pointer disabled:cursor-not-allowed flex items-center justify-center shrink-0"
+                                        aria-label="Previous Words"
+                                    >
+                                        <ChevronLeft size={16} strokeWidth={3} />
+                                    </button>
+                                    <div className="flex items-center justify-center min-w-[50px] sm:min-w-[70px] shrink-0">
+                                        <span className="text-[10px] sm:text-xs font-black text-primary/90 uppercase tracking-wider select-none tabular-nums whitespace-nowrap">
+                                            {allActiveWordsUnpaginated.length > 0 ? `${wordPage * wordsPerPage + 1}-${Math.min((wordPage + 1) * wordsPerPage, allActiveWordsUnpaginated.length)}` : '0-0'}
+                                        </span>
+                                    </div>
+                                    <button
+                                        onClick={() => setWordPage(p => p + 1)}
+                                        disabled={!allActiveWordsUnpaginated || ((wordPage + 1) * wordsPerPage) >= allActiveWordsUnpaginated.length}
+                                        className="p-1 sm:p-1.5 rounded-lg hover:bg-primary/20 hover:text-primary transition-all disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-current cursor-pointer disabled:cursor-not-allowed flex items-center justify-center shrink-0"
+                                        aria-label="Next Words"
+                                    >
+                                        <ChevronRight size={16} strokeWidth={3} />
+                                    </button>
+                                </div>
                             </div>
                             <CardDescription className="text-[9px] sm:text-[10px] text-muted-foreground/50 uppercase font-bold tracking-widest mt-1 truncate">
                                 {selectedParticipant === "global" ? "Full conversation vocabulary" : `Personal vocabulary: ${selectedParticipant}`}
@@ -233,12 +276,37 @@ export default function WordsPage() {
                     <Card className="bg-card/40 border-white/5 backdrop-blur-xl rounded-2xl h-full shadow-2xl overflow-hidden relative group">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 rounded-full blur-3xl -mr-16 -mt-16 opacity-0 group-hover:opacity-100 transition-opacity" />
                         <CardHeader className="pb-2 p-4 sm:p-6">
-                            <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg font-black tracking-tight">
-                                <div className="p-2 sm:p-2.5 rounded-xl bg-orange-500/10 shadow-inner shrink-0">
-                                    <Smile size={16} className="text-orange-500" />
+                            <div className="flex items-center justify-between gap-2 sm:gap-3">
+                                <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg font-black tracking-tight min-w-0">
+                                    <div className="p-2 sm:p-2.5 rounded-xl bg-orange-500/10 shadow-inner shrink-0 hidden xs:flex">
+                                        <Smile size={16} className="text-orange-500" />
+                                    </div>
+                                    <span className="truncate">Emoji Sentiment</span>
+                                </CardTitle>
+                                <div className="flex items-center gap-1 sm:gap-2 shrink-0 bg-[#1c1c21]/80 backdrop-blur-sm p-1 rounded-xl border border-white/5">
+                                    <button
+                                        onClick={() => setEmojiPage(p => Math.max(0, p - 1))}
+                                        disabled={emojiPage === 0}
+                                        className="p-1 sm:p-1.5 rounded-lg hover:bg-orange-500/20 hover:text-orange-500 transition-all disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-current cursor-pointer disabled:cursor-not-allowed flex items-center justify-center shrink-0"
+                                        aria-label="Previous Emojis"
+                                    >
+                                        <ChevronLeft size={16} strokeWidth={3} />
+                                    </button>
+                                    <div className="flex items-center justify-center min-w-[50px] sm:min-w-[70px] shrink-0">
+                                        <span className="text-[10px] sm:text-xs font-black text-orange-500/90 uppercase tracking-wider select-none tabular-nums whitespace-nowrap">
+                                            {allActiveEmojisUnpaginated.length > 0 ? `${emojiPage * emojisPerPage + 1}-${Math.min((emojiPage + 1) * emojisPerPage, allActiveEmojisUnpaginated.length)}` : '0-0'}
+                                        </span>
+                                    </div>
+                                    <button
+                                        onClick={() => setEmojiPage(p => p + 1)}
+                                        disabled={!allActiveEmojisUnpaginated || ((emojiPage + 1) * emojisPerPage) >= allActiveEmojisUnpaginated.length}
+                                        className="p-1 sm:p-1.5 rounded-lg hover:bg-orange-500/20 hover:text-orange-500 transition-all disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-current cursor-pointer disabled:cursor-not-allowed flex items-center justify-center shrink-0"
+                                        aria-label="Next Emojis"
+                                    >
+                                        <ChevronRight size={16} strokeWidth={3} />
+                                    </button>
                                 </div>
-                                Emoji Sentiment
-                            </CardTitle>
+                            </div>
                             <CardDescription className="text-[9px] sm:text-[10px] text-muted-foreground/50 uppercase font-bold tracking-widest mt-1">
                                 Top expressive icons in this context
                             </CardDescription>
@@ -257,12 +325,14 @@ export default function WordsPage() {
                                 <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 gap-3">
                                     {activeEmojis.map((emojiObj: any, idx: number) => (
                                         <motion.div
-                                            key={idx}
+                                            key={emojiPage * emojisPerPage + idx}
                                             variants={fadeUp}
                                             whileHover={{ scale: 1.02, translateY: -2 }}
-                                            className={`relative flex flex-col items-center justify-center p-4 rounded-2xl border transition-all cursor-default overflow-hidden group/emoji ${idx === 0
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => { }} // Forces tap to trigger hover states on mobile
+                                            className={`relative flex flex-col items-center justify-center p-4 rounded-2xl border transition-all cursor-pointer sm:cursor-default overflow-hidden group/emoji ${emojiPage === 0 && idx === 0
                                                 ? "bg-primary/10 border-primary/20 shadow-xl shadow-primary/5"
-                                                : "bg-[#1c1c21]/50 border-white/5 hover:border-primary/20 hover:bg-primary/5"
+                                                : "bg-[#1c1c21]/50 border-white/5 hover:border-primary/20 hover:bg-primary/5 active:border-primary/20 active:bg-primary/10"
                                                 }`}
                                         >
                                             <div className="relative z-10 flex flex-col items-center gap-3 w-full">
@@ -272,7 +342,7 @@ export default function WordsPage() {
                                                         {emojiObj.emoji}
                                                     </span>
 
-                                                    <div className="relative z-10 filter drop-shadow-lg transform transition-transform group-hover/emoji:scale-110 duration-500">
+                                                    <div className="relative z-10 filter drop-shadow-lg transform transition-transform group-hover/emoji:scale-110 group-active/emoji:scale-110 duration-500">
                                                         <Emoji
                                                             unified={getEmojiUnified(emojiObj.emoji)}
                                                             emojiStyle={EmojiStyle.APPLE}
@@ -282,7 +352,7 @@ export default function WordsPage() {
                                                 </div>
 
                                                 <div className="flex flex-col items-center w-full px-2">
-                                                    <div className="w-full h-[1px] bg-white/5 mb-2 hidden group-hover/emoji:block" />
+                                                    <div className="w-full h-[1px] bg-white/5 mb-2 opacity-20 sm:opacity-0 group-hover/emoji:opacity-100 group-active/emoji:opacity-100 transition-opacity duration-300" />
                                                     <div className="flex flex-col items-center">
                                                         <span className="text-[9px] font-black text-muted-foreground/30 uppercase tracking-[0.2em] leading-none mb-1">Occurrences</span>
                                                         <span className="text-xl font-black tracking-tight tabular-nums text-white/90 drop-shadow-sm">{emojiObj.count}</span>
@@ -290,7 +360,7 @@ export default function WordsPage() {
                                                 </div>
                                             </div>
 
-                                            {idx === 0 && (
+                                            {emojiPage === 0 && idx === 0 && (
                                                 <div className="absolute top-4 right-4">
                                                     <div className="relative">
                                                         <div className="absolute inset-0 bg-primary blur-md opacity-40 animate-pulse" />
@@ -302,8 +372,8 @@ export default function WordsPage() {
                                             {/* Rank badge - more professional styling */}
                                             <div className="absolute top-4 left-4">
                                                 <div className="flex items-center gap-1.5">
-                                                    <span className={`text-[10px] font-black italic tracking-tighter ${idx < 3 ? 'text-primary' : 'text-muted-foreground/40'}`}>
-                                                        #{idx + 1}
+                                                    <span className={`text-[10px] font-black italic tracking-tighter ${(emojiPage * emojisPerPage + idx) < 3 ? 'text-primary' : 'text-muted-foreground/40'}`}>
+                                                        #{emojiPage * emojisPerPage + idx + 1}
                                                     </span>
                                                 </div>
                                             </div>

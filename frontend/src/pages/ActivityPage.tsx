@@ -9,6 +9,7 @@ import { useChatStore } from "../stores/chatStore";
 import { Skeleton } from "../components/ui/skeleton";
 import { CHART_COLORS } from "../constants/appConstants";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
+import NoDataView from "../components/ui/NoDataView";
 import {
     ChartContainer,
     ChartTooltip,
@@ -34,7 +35,7 @@ const fadeUp = {
 };
 
 export default function ActivityPage() {
-    const { analysis, isLoading } = useChatStore();
+    const { sessionId, analysis, isLoading } = useChatStore();
 
     const ActivitySkeleton = () => (
         <div className="space-y-8 pb-12 animate-in fade-in duration-500">
@@ -69,6 +70,7 @@ export default function ActivityPage() {
         </div>
     );
 
+    if (!sessionId) return <NoDataView />;
     if (isLoading || !analysis) return <ActivitySkeleton />;
 
     const { activity } = analysis;

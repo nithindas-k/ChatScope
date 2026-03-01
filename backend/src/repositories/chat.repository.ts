@@ -10,9 +10,15 @@ export class ChatRepository implements IChatRepository {
     async save(
         sessionId: string,
         fileName: string,
-        messages: IMessage[]
+        messages: IMessage[],
+        stats: any,
+        activity: any,
+        responseTime: any,
+        wordAnalysis: any,
+        sentiment: any
     ): Promise<IChatAnalysis> {
         const participants = [...new Set(messages.map((m) => m.sender))];
+        const last50Messages = messages.slice(-50); // Store sample for AI summary
 
         const doc = await ChatAnalysis.findOneAndUpdate(
             { sessionId },
@@ -21,7 +27,12 @@ export class ChatRepository implements IChatRepository {
                 fileName,
                 totalMessages: messages.length,
                 participants,
-                messages,
+                stats,
+                activity,
+                responseTime,
+                wordAnalysis,
+                sentiment,
+                last50Messages
             },
             { upsert: true, new: true }
         );

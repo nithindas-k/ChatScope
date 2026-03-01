@@ -40,9 +40,24 @@ export const uploadChat = async (
             throw new ApiError(HTTP_STATUS.UNPROCESSABLE_ENTITY, MESSAGES.UPLOAD_PARSE_ERROR);
         }
 
-        await chatRepo.save(sessionId, req.file.originalname, messages);
-
+        // Precompute all analysis to avoid storing huge `messages` array, 
+        // which prevents MongoDB BSON 16MB document size limit issues.
         const stats = analyzerService.getMessageStats(messages);
+        const activity = analyzerService.getActivityData(messages);
+        const responseTime = analyzerService.getResponseTimeAnalysis(messages);
+        const wordAnalysis = analyzerService.getWordAnalysis(messages);
+        const sentiment = aiService.computeLocalSentiment(messages);
+
+        await chatRepo.save(
+            sessionId,
+            req.file.originalname,
+            messages,
+            stats,
+            activity,
+            responseTime,
+            wordAnalysis,
+            sentiment
+        );
 
         res.status(HTTP_STATUS.CREATED).json(
             successResponse(MESSAGES.UPLOAD_SUCCESS, {
@@ -72,20 +87,14 @@ export const getAnalysis = async (
             throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.ANALYSIS_NOT_FOUND);
         }
 
-        const { messages } = chatDoc;
-        const stats = analyzerService.getMessageStats(messages);
-        const activity = analyzerService.getActivityData(messages);
-        const responseTime = analyzerService.getResponseTimeAnalysis(messages);
-        const sentiment = aiService.computeLocalSentiment(messages);
-
         res.status(HTTP_STATUS.OK).json(
             successResponse(MESSAGES.ANALYSIS_SUCCESS, {
                 sessionId,
                 fileName: chatDoc.fileName,
-                stats,
-                activity,
-                responseTime,
-                sentiment,
+                stats: chatDoc.stats,
+                activity: chatDoc.activity,
+                responseTime: chatDoc.responseTime,
+                sentiment: chatDoc.sentiment,
             })
         );
     } catch (error) {
@@ -107,9 +116,7 @@ export const getWordAnalysis = async (
             throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.ANALYSIS_NOT_FOUND);
         }
 
-        const wordData = analyzerService.getWordAnalysis(chatDoc.messages);
-
-        res.status(HTTP_STATUS.OK).json(successResponse(MESSAGES.ANALYSIS_SUCCESS, wordData));
+        res.status(HTTP_STATUS.OK).json(successResponse(MESSAGES.ANALYSIS_SUCCESS, chatDoc.wordAnalysis));
     } catch (error) {
         next(error);
     }
@@ -130,15 +137,13 @@ export const getAiSummary = async (
         }
 
         if (!process.env.GROQ_API_KEY || process.env.GROQ_API_KEY === "your_groq_api_key_here") {
-            // Return local sentiment as fallback if no API key
-            const localSentiment = aiService.computeLocalSentiment(chatDoc.messages);
             res.status(HTTP_STATUS.OK).json(
                 successResponse(MESSAGES.AI_SUMMARY_SUCCESS, {
                     summary: "AI summary unavailable (no API key). Add GROQ_API_KEY to .env",
                     mainTopics: [],
                     communicationTone: "Analysis pending",
                     relationshipStyle: "Analysis pending",
-                    sentimentBreakdown: localSentiment,
+                    sentimentBreakdown: chatDoc.sentiment,
                     toxicityFlags: [],
                     keyInsights: ["Add your Groq API key to enable full AI analysis"],
                 })
@@ -146,7 +151,7 @@ export const getAiSummary = async (
             return;
         }
 
-        const aiResult = await aiService.generateSummary(chatDoc.messages);
+        const aiResult = await aiService.generateSummary(chatDoc.last50Messages);
 
         res.status(HTTP_STATUS.OK).json(successResponse(MESSAGES.AI_SUMMARY_SUCCESS, aiResult));
     } catch (error) {
@@ -168,9 +173,7 @@ export const getResponseTime = async (
             throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.ANALYSIS_NOT_FOUND);
         }
 
-        const responseData = analyzerService.getResponseTimeAnalysis(chatDoc.messages);
-
-        res.status(HTTP_STATUS.OK).json(successResponse(MESSAGES.ANALYSIS_SUCCESS, responseData));
+        res.status(HTTP_STATUS.OK).json(successResponse(MESSAGES.ANALYSIS_SUCCESS, chatDoc.responseTime));
     } catch (error) {
         next(error);
     }

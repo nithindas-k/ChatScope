@@ -12,6 +12,7 @@ import { Skeleton } from "../components/ui/skeleton";
 import { Separator } from "../components/ui/separator";
 import { Avatar, AvatarFallback } from "../components/ui/avatar";
 import { Progress } from "../components/ui/progress";
+import NoDataView from "../components/ui/NoDataView";
 
 const stagger = {
     hidden: {},
@@ -99,6 +100,7 @@ export default function InsightsPage() {
         );
     }
 
+    if (!sessionId) return <NoDataView />;
     if (isLoading || !aiSummary) return <InsightsSkeleton />;
 
     const {

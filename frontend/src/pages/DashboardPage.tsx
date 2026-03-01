@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { Avatar, AvatarFallback } from "../components/ui/avatar";
 import { Skeleton } from "../components/ui/skeleton";
 import { CHART_COLORS } from "../constants/appConstants";
+import NoDataView from "../components/ui/NoDataView";
 
 const stagger = {
     hidden: {},
@@ -113,6 +114,7 @@ export default function DashboardPage() {
         </div>
     );
 
+    if (!sessionId) return <NoDataView />;
     if (isLoading || !analysis) return <DashboardSkeleton />;
 
     const { stats } = analysis;

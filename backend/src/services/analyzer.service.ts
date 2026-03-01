@@ -180,12 +180,12 @@ export class AnalyzerService {
         Object.keys(perSenderWordMap).forEach(sender => {
             perSenderWords[sender] = Object.entries(perSenderWordMap[sender])
                 .sort((a, b) => b[1] - a[1])
-                .slice(0, 15)
+                .slice(0, 500)
                 .map(([word, count]) => ({ word, count }));
 
             perSenderEmojis[sender] = Object.entries(perSenderEmojiMap[sender] || {})
                 .sort((a, b) => b[1] - a[1])
-                .slice(0, 10)
+                .slice(0, 100)
                 .map(([emoji, count]) => ({ emoji, count }));
 
             perSenderAvgLength[sender] = perSenderMsgCount[sender] > 0
@@ -194,8 +194,8 @@ export class AnalyzerService {
         });
 
         return {
-            topWords: Object.entries(wordCount).sort((a, b) => b[1] - a[1]).slice(0, 30).map(([word, count]) => ({ word, count })),
-            emojiFrequency: Object.entries(emojiCount).sort((a, b) => b[1] - a[1]).slice(0, 20).map(([emoji, count]) => ({ emoji, count })),
+            topWords: Object.entries(wordCount).sort((a, b) => b[1] - a[1]).slice(0, 500).map(([word, count]) => ({ word, count })),
+            emojiFrequency: Object.entries(emojiCount).sort((a, b) => b[1] - a[1]).slice(0, 100).map(([emoji, count]) => ({ emoji, count })),
             avgMessageLength: textCount > 0 ? Math.round(totalLength / textCount) : 0,
             perSenderWords,
             perSenderEmojis,
